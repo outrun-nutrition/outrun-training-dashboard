@@ -899,7 +899,7 @@ function saveState(s) { localStorage.setItem('outrun_training_v2', JSON.stringif
 
 const CLOUD = {
   url() { return getState().cloudConfig?.url || ''; },
-  token() { return getState().cloudConfig?.token || 'outrun-training-2026-buzz'; },
+  token() { return getState().cloudConfig?.token || ''; },
 
   async _post(body) {
     const url = this.url();
@@ -943,23 +943,51 @@ const CLOUD = {
 };
 
 async function cloudConfigure() {
-  const cur = getState().cloudConfig?.url || '';
-  const url = window.prompt('Apps Script Web App URL:\n（部署後 .../exec 結尾）', cur);
+  const cur = getState().cloudConfig || {};
+  const url = window.prompt('Apps Script Web App URL:\n（部署後 .../exec 結尾）', cur.url || '');
   if (!url) return;
-  const s = getState();
-  s.cloudConfig = { url: url.trim(), token: 'outrun-training-2026-buzz' };
-  saveState(s);
-  showToast('設定完成，測試連線...');
-  const pong = await CLOUD.ping();
+  const suggestion = cur.token || (crypto.randomUUID ? crypto.randomUUID().replace(/-/g, '').slice(0, 20) : 'tok-' + Date.now());
+  const token = window.prompt(
+    'API Token（要跟 Apps Script 裡的 API_TOKEN 常數一致）:\n\n' +
+    '第一次：用建議的隨機字串，複製到 Apps Script 貼上、重新部署\n' +
+    '換新 token：Apps Script 改常數 + 重新部署 + 這裡也更新',
+    suggestion
+  );
+  if (!token) return;
+
+  const tempConfig = { url: url.trim(), token: token.trim() };
+  showToast('測試連線...');
+  const pong = await pingWithConfig(tempConfig);
   if (!pong.ok) {
-    alert('連線失敗：' + (pong.error || '未回應') + '\n請確認 URL、部署權限、token');
+    alert('連線失敗：' + (pong.error || '未回應') + '\n\n常見原因：\n' +
+          '• URL 錯（要 /exec 結尾）\n' +
+          '• Token 與 Apps Script API_TOKEN 不一致\n' +
+          '• 部署權限不是「任何人」（不是「任何 Google 帳號」）\n' +
+          '• Apps Script 尚未部署\n\n設定未儲存，請修正後再試');
     return;
   }
+  const s = getState();
+  s.cloudConfig = tempConfig;
+  saveState(s);
   showToast('連線成功 ✓');
+  renderCloudStatus();
   if (window.confirm('要把本機資料批次上傳到 Sheet 嗎？\n（第一次連接建議做）')) {
     await cloudBulkPush();
   }
   await cloudPull();
+}
+
+async function pingWithConfig(config) {
+  if (!config.url || !config.token) return { ok: false, error: '缺 URL 或 token' };
+  try {
+    const u = new URL(config.url);
+    u.searchParams.set('token', config.token);
+    u.searchParams.set('action', 'ping');
+    const r = await fetch(u.toString(), { method: 'GET', mode: 'cors', redirect: 'follow' });
+    return await r.json();
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
 }
 
 async function cloudBulkPush() {
