@@ -1,0 +1,2087 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Outrun 訓練計畫 2026 · HYROX + 台北馬</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --card-2: #334155;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #f97316;
+    --hyrox: #3b82f6;
+    --marathon: #10b981;
+    --new: #eab308;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --border: #334155;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .header-top { display: flex; justify-content: space-between; align-items: center; }
+  .title { font-size: 1.05rem; font-weight: 700; letter-spacing: 0.02em; }
+  .subtitle { font-size: 0.72rem; color: var(--muted); margin-top: 0.2rem; }
+  .countdown { display: flex; gap: 0.5rem; margin-top: 0.6rem; font-size: 0.72rem; flex-wrap: wrap; }
+  .countdown span { background: var(--card-2); padding: 0.2rem 0.55rem; border-radius: 5px; }
+  .countdown .accent { background: var(--accent); color: #000; font-weight: 600; }
+  .countdown .hyrox { background: var(--hyrox); color: #000; font-weight: 600; }
+  .countdown .marathon { background: var(--marathon); color: #000; font-weight: 600; }
+  .coach-btn {
+    background: linear-gradient(135deg, var(--accent), #ea580c); color: #000; border: none;
+    padding: 0.35rem 0.7rem; border-radius: 6px; font-weight: 700; font-size: 0.75rem;
+    cursor: pointer; font-family: inherit;
+  }
+
+  nav.tabs {
+    display: flex; background: var(--card); border-bottom: 1px solid var(--border);
+    position: sticky; top: 85px; z-index: 9; overflow-x: auto;
+  }
+  nav.tabs button {
+    flex: 1; min-width: 70px; padding: 0.8rem 0.3rem; background: none; border: none;
+    color: var(--muted); font-size: 0.82rem; cursor: pointer; border-bottom: 2px solid transparent;
+    font-family: inherit; white-space: nowrap;
+  }
+  nav.tabs button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+  main { padding: 1rem; max-width: 900px; margin: 0 auto; padding-bottom: 6rem; }
+  section { display: none; }
+  section.active { display: block; }
+
+  .card {
+    background: var(--card); border-radius: 12px; padding: 1.2rem; margin-bottom: 1rem;
+    border: 1px solid var(--border);
+  }
+  .card-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.75rem; }
+  .card-sub { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.5rem; }
+
+  .today-hero {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border: 2px solid var(--accent); cursor: pointer;
+  }
+  .today-hero .date { font-size: 0.82rem; color: var(--muted); }
+  .today-hero .workout-title { font-size: 1.4rem; font-weight: 700; margin: 0.5rem 0; color: var(--accent); }
+  .today-hero .workout-detail { font-size: 0.9rem; line-height: 1.65; margin: 0.7rem 0; white-space: pre-line; }
+  .today-hero .week-meta { display: flex; gap: 0.5rem; font-size: 0.75rem; color: var(--muted); flex-wrap: wrap; margin-top: 0.5rem; }
+  .today-hero .week-meta span { background: var(--card-2); padding: 0.2rem 0.55rem; border-radius: 4px; }
+
+  .btn {
+    display: inline-block; padding: 0.55rem 1.1rem; background: var(--accent); color: #000;
+    border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-family: inherit;
+    font-size: 0.88rem; margin-right: 0.5rem; margin-top: 0.3rem;
+  }
+  .btn.secondary { background: var(--card-2); color: var(--text); }
+  .btn.done { background: var(--marathon); color: #000; }
+
+  .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.4rem; margin: 0.75rem 0; }
+  @media (max-width: 640px) { .week-grid { grid-template-columns: 1fr; } }
+  .day-cell {
+    background: var(--card-2); padding: 0.55rem 0.4rem; border-radius: 8px; text-align: center;
+    cursor: pointer; border: 2px solid transparent; transition: 0.15s; font-size: 0.72rem;
+    min-height: 90px; display: flex; flex-direction: column; justify-content: center;
+    position: relative;
+  }
+  @media (max-width: 640px) { .day-cell { flex-direction: row; justify-content: space-between; text-align: left; padding: 0.75rem; min-height: auto; } }
+  .day-cell:hover { border-color: var(--accent); }
+  .day-cell.today { border-color: var(--accent); background: #3a2e1a; }
+  .day-cell.done { opacity: 0.5; }
+  .day-cell.done::after { content: "✓"; color: var(--marathon); font-weight: bold; position: absolute; top: 4px; right: 6px; font-size: 0.85rem; }
+  .day-cell.has-new { border-color: var(--new); box-shadow: 0 0 0 1px var(--new), 0 0 10px rgba(234,179,8,0.2); }
+  .day-cell .dow { font-weight: 700; font-size: 0.72rem; color: var(--muted); }
+  .day-cell .type { font-size: 0.65rem; margin-top: 0.2rem; }
+  .day-cell .title { font-weight: 600; color: var(--text); font-size: 0.75rem; margin-top: 0.15rem; }
+  .new-badge {
+    display: inline-block; background: var(--new); color: #000; font-size: 0.6rem; font-weight: 700;
+    padding: 0.05rem 0.35rem; border-radius: 3px; margin-left: 0.2rem; vertical-align: middle;
+  }
+  .repeat-badge {
+    display: inline-block; color: var(--muted); font-size: 0.6rem; padding: 0.05rem 0.3rem;
+    border: 1px solid var(--border); border-radius: 3px; margin-left: 0.2rem; vertical-align: middle;
+  }
+
+  .type-rest { color: var(--muted); }
+  .type-easy { color: #94a3b8; }
+  .type-quality { color: var(--accent); }
+  .type-long { color: var(--marathon); }
+  .type-strength { color: var(--hyrox); }
+  .type-hyrox { color: var(--hyrox); }
+  .type-race { color: var(--danger); font-weight: 700; }
+
+  .block-header {
+    background: var(--card); padding: 0.85rem 1rem; border-radius: 8px; margin: 1rem 0 0.4rem;
+    display: flex; justify-content: space-between; align-items: center;
+    border-left: 4px solid var(--accent);
+  }
+  .block-header.hyrox { border-left-color: var(--hyrox); }
+  .block-header.marathon { border-left-color: var(--marathon); }
+  .block-header.deload { border-left-color: var(--muted); }
+  .block-header h3 { font-size: 0.95rem; font-weight: 600; }
+  .block-header .meta { font-size: 0.72rem; color: var(--muted); margin-top: 0.2rem; }
+  .week-row {
+    display: grid; grid-template-columns: 55px 1fr 70px 70px;
+    gap: 0.6rem; padding: 0.7rem 0.9rem; font-size: 0.82rem;
+    border-bottom: 1px solid var(--border); cursor: pointer; align-items: center;
+  }
+  .week-row:hover { background: var(--card-2); }
+  .week-row.current { background: var(--card-2); border-left: 3px solid var(--accent); }
+  .week-row .wk { font-weight: 700; color: var(--accent); }
+  .week-row .vol, .week-row .long { text-align: right; color: var(--muted); font-size: 0.75rem; }
+  .deload-badge, .peak-badge {
+    display: inline-block; padding: 0 0.4rem; border-radius: 3px; font-size: 0.62rem; margin-left: 0.25rem;
+    font-weight: 600;
+  }
+  .deload-badge { background: var(--muted); color: #000; }
+  .peak-badge { background: var(--accent); color: #000; }
+
+  .modal-bg {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.78); z-index: 100;
+    align-items: center; justify-content: center; padding: 0.75rem;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--card); border-radius: 12px; padding: 1.3rem; max-width: 520px; width: 100%;
+    max-height: 88vh; overflow-y: auto; border: 1px solid var(--border);
+  }
+  .modal-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--accent); }
+  .modal-date { font-size: 0.82rem; color: var(--muted); margin-bottom: 0.8rem; }
+  .modal-detail { white-space: pre-line; line-height: 1.65; margin: 0.8rem 0; font-size: 0.88rem; }
+  .close-btn { background: none; border: none; color: var(--muted); font-size: 1.4rem; cursor: pointer; float: right; }
+
+  .log-section { margin-top: 1.2rem; padding-top: 0.9rem; border-top: 1px solid var(--border); }
+  .log-row { display: flex; gap: 0.7rem; margin-bottom: 0.65rem; align-items: center; }
+  .log-row label { flex: 0 0 85px; font-size: 0.82rem; color: var(--muted); }
+  .log-row input, .log-row textarea, .log-row select {
+    flex: 1; background: var(--bg); color: var(--text); border: 1px solid var(--border);
+    padding: 0.45rem; border-radius: 6px; font-family: inherit; font-size: 0.85rem;
+  }
+  .log-row textarea { min-height: 55px; resize: vertical; }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.65rem; margin: 0.8rem 0; }
+  .stat-card { background: var(--card-2); padding: 0.7rem; border-radius: 8px; text-align: center; }
+  .stat-value { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 0.7rem; color: var(--muted); margin-top: 0.2rem; }
+
+  table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.82rem; }
+  table th, table td { padding: 0.45rem; text-align: left; border-bottom: 1px solid var(--border); }
+  table th { background: var(--card-2); color: var(--muted); font-size: 0.72rem; font-weight: 600; }
+
+  .redline { background: rgba(239,68,68,0.1); border-left: 3px solid var(--danger); padding: 0.7rem; margin: 0.5rem 0; border-radius: 4px; font-size: 0.82rem; }
+  ul.details { margin: 0.5rem 0 0.5rem 1.2rem; font-size: 0.82rem; line-height: 1.7; }
+
+  .week-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+  .week-nav button { background: var(--card-2); border: none; color: var(--text); padding: 0.45rem 0.9rem; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 0.85rem; }
+  .week-nav .wk-title { font-weight: 700; font-size: 1rem; }
+
+  .highlights-box {
+    background: rgba(234,179,8,0.1); border-left: 3px solid var(--new);
+    padding: 0.7rem 0.9rem; border-radius: 6px; margin-bottom: 0.75rem; font-size: 0.85rem;
+  }
+  .highlights-box .h-title { font-weight: 700; color: var(--new); font-size: 0.8rem; margin-bottom: 0.3rem; }
+  .highlights-box ul { margin-left: 1rem; line-height: 1.65; }
+
+  .template-box {
+    background: rgba(148,163,184,0.08); border-left: 3px solid var(--muted);
+    padding: 0.65rem 0.85rem; border-radius: 6px; margin-bottom: 0.75rem; font-size: 0.78rem;
+  }
+  .template-box .t-title { font-weight: 600; color: var(--muted); font-size: 0.75rem; margin-bottom: 0.35rem; }
+
+  canvas { display: block; max-width: 100%; background: var(--card-2); border-radius: 6px; }
+  .chart-row { margin: 0.5rem 0 1rem; }
+
+  .tool-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+
+  .week-nav select {
+    background: var(--card-2); color: var(--text); border: 1px solid var(--border);
+    padding: 0.45rem 0.6rem; border-radius: 6px; font-family: inherit; font-size: 0.85rem;
+    flex: 1; margin: 0 0.5rem; max-width: 220px;
+  }
+  .quick-jump { display: flex; gap: 0.35rem; overflow-x: auto; padding: 0 0 0.5rem; margin-bottom: 0.5rem; }
+  .quick-jump button {
+    background: var(--card-2); border: 1px solid var(--border); color: var(--text);
+    padding: 0.3rem 0.65rem; border-radius: 14px; cursor: pointer; font-family: inherit;
+    font-size: 0.72rem; white-space: nowrap;
+  }
+  .quick-jump button:hover { background: var(--accent); color: #000; }
+  .quick-jump button.race { background: var(--danger); color: #fff; }
+
+  .template-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.65rem 0 0.25rem; }
+  .chip {
+    background: var(--card-2); color: var(--text); border: 1px solid var(--border);
+    padding: 0.22rem 0.55rem; border-radius: 12px; cursor: pointer; font-family: inherit;
+    font-size: 0.7rem;
+  }
+  .chip:hover { background: var(--hyrox); color: #000; border-color: var(--hyrox); }
+  .chip-label { color: var(--muted); font-size: 0.7rem; margin-right: 0.3rem; }
+
+  .briefing-box {
+    background: rgba(59,130,246,0.1); border-left: 3px solid var(--hyrox);
+    padding: 0.6rem 0.85rem; border-radius: 6px; margin: 0.7rem 0; font-size: 0.85rem;
+    line-height: 1.55;
+  }
+  .briefing-box .b-label { color: var(--hyrox); font-weight: 700; font-size: 0.72rem; display: block; margin-bottom: 0.2rem; }
+
+  .adjust-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+  .adjust-row button {
+    background: var(--card-2); color: var(--text); border: 1px solid var(--border);
+    padding: 0.4rem 0.75rem; border-radius: 18px; cursor: pointer; font-family: inherit; font-size: 0.75rem;
+  }
+  .adjust-row button:hover { background: var(--warning); color: #000; }
+  .adjust-label { display: block; color: var(--muted); font-size: 0.72rem; margin-bottom: 0.25rem; margin-top: 0.65rem; }
+
+  .adjustment-badge {
+    display: inline-block; background: var(--warning); color: #000; font-size: 0.6rem; font-weight: 700;
+    padding: 0.05rem 0.35rem; border-radius: 3px; margin-left: 0.2rem; vertical-align: middle;
+  }
+
+  .week-row.comp-green { border-left-color: var(--marathon); }
+  .week-row.comp-yellow { border-left-color: var(--warning); }
+  .week-row.comp-red { border-left-color: var(--danger); }
+  .comp-indicator { display: inline-block; font-size: 0.65rem; padding: 0.1rem 0.4rem; border-radius: 3px; margin-left: 0.3rem; font-weight: 600; }
+  .comp-green-bg { background: var(--marathon); color: #000; }
+  .comp-yellow-bg { background: var(--warning); color: #000; }
+  .comp-red-bg { background: var(--danger); color: #fff; }
+
+  .badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.55rem; margin-top: 0.5rem; }
+  .badge {
+    background: var(--card-2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 0.65rem 0.6rem; text-align: center; font-size: 0.7rem; transition: 0.2s;
+  }
+  .badge.unlocked { background: linear-gradient(135deg, rgba(249,115,22,0.2), rgba(234,179,8,0.2)); border-color: var(--accent); }
+  .badge.locked { opacity: 0.4; }
+  .badge .b-name { font-weight: 600; margin-top: 0.3rem; line-height: 1.3; }
+  .badge .b-date { color: var(--muted); font-size: 0.62rem; margin-top: 0.3rem; }
+
+  .sun-summary {
+    background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(59,130,246,0.1));
+    border: 2px solid var(--marathon); border-radius: 12px; padding: 1rem; margin-bottom: 1rem;
+  }
+  .sun-summary .s-title { color: var(--marathon); font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .sun-summary .s-row { display: flex; justify-content: space-between; padding: 0.3rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }
+  .sun-summary .s-row strong { color: var(--text); }
+
+  .day-cell.swap-selected { border-color: var(--warning) !important; box-shadow: 0 0 10px rgba(245,158,11,0.4); }
+  .day-cell .swap-btn {
+    position: absolute; top: 4px; left: 6px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 3px; padding: 0.1rem 0.3rem; font-size: 0.55rem; color: var(--muted);
+    cursor: pointer; z-index: 2;
+  }
+  .day-cell .swap-btn:hover { background: var(--warning); color: #000; border-color: var(--warning); }
+
+  .strava-box { background: var(--card-2); padding: 0.75rem; border-radius: 8px; margin: 0.5rem 0; font-size: 0.82rem; }
+  .strava-status { color: var(--muted); font-size: 0.72rem; margin-top: 0.3rem; }
+  .coach-box { background: rgba(249,115,22,0.1); border-left: 3px solid var(--accent); padding: 0.65rem 0.8rem; border-radius: 6px; margin-top: 0.6rem; font-size: 0.82rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div>
+      <div class="title">🏃 Outrun Training 2026</div>
+      <div class="subtitle">HYROX 10/15 · 台北馬 12/20</div>
+    </div>
+    <button class="coach-btn" onclick="openCoach()">🎯 教練</button>
+  </div>
+  <div class="countdown" id="countdown"></div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="today">今日</button>
+  <button class="tab-btn" data-tab="week">本週</button>
+  <button class="tab-btn" data-tab="plan">全程</button>
+  <button class="tab-btn" data-tab="trends">趨勢</button>
+  <button class="tab-btn" data-tab="ref">參考</button>
+</nav>
+
+<main>
+
+<section id="today" class="active">
+  <div id="sun-summary-container"></div>
+  <div id="today-content"></div>
+  <div class="card">
+    <div class="card-title">📊 近 7 天完成率</div>
+    <div id="completion-stats"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">🤝 週日 Review（每週日提醒）</div>
+    <div class="card-sub">下個週日 <span id="next-sunday"></span> 提醒你回答 6 題</div>
+    <button class="btn secondary" onclick="openWeeklyReview()">立即填寫本週 Review</button>
+  </div>
+</section>
+
+<section id="week">
+  <div class="quick-jump">
+    <button onclick="jumpToWeek(0)">W0 開跑</button>
+    <button onclick="jumpToWeek(1)">A 基礎</button>
+    <button onclick="jumpToWeek(9)">B 混合</button>
+    <button onclick="jumpToWeek(17)">C1 健身房</button>
+    <button onclick="jumpToWeek(23)">C2 Taper</button>
+    <button class="race" onclick="jumpToWeek(25)">🔴 HYROX</button>
+    <button onclick="jumpToWeek(27)">E 馬拉松</button>
+    <button onclick="jumpToWeek(33)">F Taper</button>
+    <button class="race" onclick="jumpToWeek(34)">🔴 台北馬</button>
+  </div>
+  <div class="week-nav">
+    <button onclick="changeWeek(-1)">← 上週</button>
+    <select id="week-selector" onchange="jumpToWeek(parseInt(this.value))"></select>
+    <button onclick="changeWeek(1)">下週 →</button>
+  </div>
+  <div class="card">
+    <div class="wk-title" id="week-title" style="margin-bottom:0.5rem"></div>
+    <div id="week-meta"></div>
+    <div id="week-highlights"></div>
+    <div id="week-template"></div>
+    <div class="week-grid" id="week-grid"></div>
+  </div>
+</section>
+
+<section id="plan">
+  <div class="card">
+    <div class="card-title">🗺️ 全程視覺化（35 週）</div>
+    <div class="chart-row"><canvas id="chart-full-plan" height="180"></canvas></div>
+    <div class="card-sub">淺色=週里程、深色=長跑；紅線=比賽；黃虛線=今日</div>
+  </div>
+  <div class="card">
+    <div class="card-title">35 週訓練骨架</div>
+    <div class="card-sub">從今天 4/24（W0 開跑準備）到 12/20 台北馬。點任何週次跳到該週。</div>
+    <div class="tool-row">
+      <button class="btn secondary" onclick="exportICS()">📅 匯出 .ics 行事曆</button>
+      <button class="btn secondary" onclick="exportJSON()">💾 匯出資料</button>
+      <button class="btn secondary" onclick="importJSON()">📥 匯入資料</button>
+    </div>
+  </div>
+  <div id="blocks-container"></div>
+</section>
+
+<section id="trends">
+  <div class="card">
+    <div class="card-title">📈 週里程進展</div>
+    <div class="chart-row"><canvas id="chart-volume" height="200"></canvas></div>
+    <div class="card-sub">橙=實際完成、灰=計畫</div>
+  </div>
+  <div class="card">
+    <div class="card-title">❤️ RPE 趨勢（實際感受）</div>
+    <div class="chart-row"><canvas id="chart-rpe" height="160"></canvas></div>
+    <div class="card-sub">連續 3 天 RPE > 7 會觸發紅線</div>
+  </div>
+  <div class="card">
+    <div class="card-title">🦶 右踝狀態</div>
+    <div class="chart-row"><canvas id="chart-ankle" height="160"></canvas></div>
+    <div class="card-sub">> 3 = 紅線，> 5 立即停跑</div>
+  </div>
+  <div class="card">
+    <div class="card-title">💗 HRV 趨勢（Apple Health）</div>
+    <div class="chart-row"><canvas id="chart-hrv" height="160"></canvas></div>
+    <div class="card-sub">連 3 天 < 基線 -10% = 紅線</div>
+  </div>
+  <div class="card">
+    <div class="card-title">😴 睡眠 + RHR</div>
+    <div class="chart-row"><canvas id="chart-sleep" height="160"></canvas></div>
+    <div class="card-sub">連 3 天 < 6hr = 減半訓練</div>
+  </div>
+  <div class="card">
+    <div class="card-title">🧮 ACWR 負荷比</div>
+    <div class="chart-row"><canvas id="chart-acwr" height="160"></canvas></div>
+    <div class="card-sub">近 7 天 / 近 28 天週平均。> 1.5 = 強制減量週</div>
+  </div>
+</section>
+
+<section id="ref">
+  <div class="card">
+    <div class="card-title">☁️ 雲端同步（Google Sheets）</div>
+    <div class="strava-box">
+      <strong id="cloud-status-label">未設定</strong>
+      <div class="strava-status" id="cloud-status"></div>
+      <div class="tool-row">
+        <button class="btn secondary" onclick="cloudConfigure()">🔧 設定 URL</button>
+        <button class="btn secondary" onclick="cloudPull()">⬇️ 從雲端拉</button>
+        <button class="btn secondary" onclick="cloudBulkPush()">⬆️ 全部推上去</button>
+        <button class="btn secondary" onclick="cloudDisconnect()">斷開</button>
+      </div>
+      <div class="card-sub" style="margin-top:0.5rem">
+        部署 Apps Script 步驟請看 <code style="background:var(--bg);padding:0.1rem 0.3rem;border-radius:3px">training/appscript.gs</code> 的註解<br>
+        iOS 健康同步設定看 <code style="background:var(--bg);padding:0.1rem 0.3rem;border-radius:3px">training/docs/apple-health-ios-shortcut-setup.md</code>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏅 成就徽章</div>
+    <div class="card-sub">達成訓練 milestone 會自動解鎖</div>
+    <div class="badge-grid" id="badge-grid"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎯 AI 教練快速呼叫</div>
+    <div class="card-sub">複製當前 context 給 training-coach agent</div>
+    <div class="coach-box">
+      <strong>一鍵問教練</strong>（會複製 prompt 到剪貼簿）：
+      <div class="tool-row">
+        <button class="btn secondary" onclick="askCoach('general')">🎯 問近期狀況</button>
+        <button class="btn secondary" onclick="askCoach('weekly')">📊 本週 review 建議</button>
+      </div>
+      <div style="color:var(--muted);font-size:0.75rem;margin-top:0.5rem">貼到 terminal：<code style="background:var(--bg);padding:0.1rem 0.3rem;border-radius:3px">claude</code> 後貼 prompt</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔗 Strava 同步</div>
+    <div class="strava-box">
+      <strong>完跑資料自動回填</strong>
+      <div class="strava-status" id="strava-status">未連接</div>
+      <div class="tool-row">
+        <button class="btn secondary" onclick="stravaSync()">📥 同步近 14 天</button>
+        <button class="btn secondary" onclick="stravaDisconnect()">斷開</button>
+      </div>
+      <div class="card-sub" style="margin-top:0.5rem">
+        第一次連接：<br>
+        1. 到 <a href="https://www.strava.com/settings/api" target="_blank" style="color:var(--accent)">strava.com/settings/api</a> 取得 Access Token<br>
+        2. 按「同步近 14 天」，貼上 token<br>
+        3. 會自動讀 Run/TrailRun activities 填入當日 log 的 km / 配速<br>
+        ⚠️ Strava token 6 小時失效，每次重新取
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📚 模板庫（固定重複內容）</div>
+    <div class="card-sub">點任一模板看完整內容。日課表卡也會 chips 連進來。</div>
+    <div class="template-chips" id="ref-template-chips"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🚨 紅線警示</div>
+    <div class="redline"><strong>腳踝銳痛 > 3/10</strong> → 立即停跑，改游泳/bike</div>
+    <div class="redline"><strong>HRV 連續 3 天低於基線 -10%</strong> → 下次跑課降 Z1</div>
+    <div class="redline"><strong>睡眠連 3 天 < 6hr</strong> → 減半當日運動量</div>
+    <div class="redline"><strong>ACWR > 1.5</strong>（近 7 天 / 近 28 天週平均）→ 強制減量週</div>
+    <div class="redline"><strong>感冒/發燒</strong> → 完全休 72hr 後才 30min easy</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💪 強度區間（RPE）</div>
+    <table>
+      <tr><th>Zone</th><th>RPE</th><th>感受</th></tr>
+      <tr><td>Z1 Recovery</td><td>2-3</td><td>非常輕鬆、鼻呼吸</td></tr>
+      <tr><td>Z2 Aerobic</td><td>4-5</td><td>能講完整句子</td></tr>
+      <tr><td>Z3 Tempo</td><td>6</td><td>短句、有點喘</td></tr>
+      <tr><td>Z4 Threshold</td><td>7-8</td><td>單詞、不能講話</td></tr>
+      <tr><td>Z5 VO2max</td><td>9+</td><td>無法說話、全力</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 週間固定模板</div>
+    <table>
+      <tr><th>星期</th><th>時段</th><th>內容</th></tr>
+      <tr><td>一</td><td>休</td><td>完全休息 + OARC 例會</td></tr>
+      <tr><td>二</td><td>1hr</td><td>Z2 easy run</td></tr>
+      <tr><td>三</td><td>30+30min</td><td>Easy run + 肌力（踝+核心）</td></tr>
+      <tr><td>四</td><td>1hr</td><td>肌力主 / HYROX 專項</td></tr>
+      <tr><td>五</td><td>1hr</td><td>Quality（tempo / intervals）</td></tr>
+      <tr><td>六</td><td>2-3hr</td><td>Long run</td></tr>
+      <tr><td>日</td><td>1hr</td><td>Recovery / cross-train</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏋️ HYROX 居家替代（W9-16）</div>
+    <table>
+      <tr><th>HYROX 站</th><th>居家替代</th></tr>
+      <tr><td>Sled push</td><td>負重背心 10kg + 斜坡 200m × 4</td></tr>
+      <tr><td>Sled pull</td><td>彈力帶反向拖拉 3min × 4</td></tr>
+      <tr><td>Burpee broad jump</td><td>原動作 80m × 1</td></tr>
+      <tr><td>Rowing 1000m</td><td>壺鈴 swing 25 + 高拉 10 × 5 輪</td></tr>
+      <tr><td>Farmer carry</td><td>壺鈴 18 + 沙袋 10 單側 × 200m × 2</td></tr>
+      <tr><td>Sandbag lunges</td><td>沙袋 10 + 背心 10 = 20kg × 100m</td></tr>
+      <tr><td>Wall balls</td><td>壺鈴 thruster 18kg × 15-18 × 4</td></tr>
+      <tr><td>Ski erg</td><td>彈力帶 15kg Ski 動作 3min × 4</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📱 Apple Health / Zepp sync 設定（未完成）</div>
+    <div class="card-sub">iOS Shortcut 每早自動推送 HRV + 靜態心率到本網頁</div>
+    <ul class="details">
+      <li>Step 1：Zepp App → 設定 → 健康資料 → 開啟「同步至 Apple Health」</li>
+      <li>Step 2：iOS 捷徑 App → 新增自動化 → 每日 07:00 → 取得健康資料（HRV、RHR、睡眠）</li>
+      <li>Step 3：取得內容 → URL: <code>http://你電腦IP:8001/sync</code> → POST JSON</li>
+      <li>⚠️ 此段需要小後端接收 webhook。請跟 Code 確認要不要建。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📅 已知行事曆衝突</div>
+    <ul class="details">
+      <li><strong>5/9 週六</strong> 深坑活動 → W2 長跑移週日 5/10</li>
+      <li><strong>5/24 週日</strong> 捷豹設攤 04:30 → W4 長跑移週六 5/23</li>
+      <li><strong>每週一 19:30-20:30</strong> OARC 例會（週一晚不排課）</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<div class="modal-bg" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal()">×</button>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-date" id="modal-date"></div>
+    <div class="modal-detail" id="modal-detail"></div>
+    <div class="template-chips" id="modal-chips"></div>
+    <div id="modal-adjust-current"></div>
+    <span class="adjust-label">🩺 今天狀況？</span>
+    <div class="adjust-row">
+      <button onclick="modalAdjust('z1')">改 Z1 輕鬆</button>
+      <button onclick="modalAdjust('rest')">完全休息</button>
+      <button onclick="modalAdjust('defer')">遞延一天</button>
+      <button onclick="modalAdjust('cancel')">取消</button>
+      <button onclick="modalClearAdjust()" class="secondary">還原</button>
+    </div>
+    <div class="adjust-row" style="margin-top:0.5rem">
+      <button onclick="initiateSwap(modalContext.weekNum, modalContext.dayIdx)" style="background:var(--warning);color:#000">↔️ 與另一天交換</button>
+      <button onclick="askCoach('day')" style="background:var(--accent);color:#000">🎯 問教練</button>
+    </div>
+    <button class="btn" id="done-btn" onclick="toggleDone()">標記完成</button>
+    <div class="log-section">
+      <div class="card-title" style="font-size:0.85rem">訓練後紀錄</div>
+      <div class="log-row"><label>實際 RPE</label><input type="number" min="1" max="10" id="log-rpe"></div>
+      <div class="log-row"><label>實際里程 km</label><input type="number" step="0.1" id="log-km"></div>
+      <div class="log-row"><label>配速 /km</label><input type="text" id="log-pace" placeholder="4:45"></div>
+      <div class="log-row"><label>腳踝 0-10</label><input type="number" min="0" max="10" id="log-ankle"></div>
+      <div class="log-row"><label>HRV（手填）</label><input type="number" id="log-hrv" placeholder="若無自動同步"></div>
+      <div class="log-row"><label>RHR（手填）</label><input type="number" id="log-rhr"></div>
+      <div class="log-row"><label>睡眠 hr</label><input type="number" step="0.1" id="log-sleep"></div>
+      <div class="log-row"><label>備註</label><textarea id="log-notes" placeholder="怎麼感覺、地形、天氣..."></textarea></div>
+      <button class="btn secondary" onclick="saveLog()">存檔</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="review-modal" onclick="if(event.target===this)closeReview()">
+  <div class="modal">
+    <button class="close-btn" onclick="closeReview()">×</button>
+    <div class="modal-title">📝 週日 Review</div>
+    <div class="modal-date" id="review-date"></div>
+    <div class="log-row"><label>本週 RPE 平均</label><input type="number" min="1" max="10" id="r-rpe"></div>
+    <div class="log-row"><label>踝疼痛 0-10</label><input type="number" min="0" max="10" id="r-ankle"></div>
+    <div class="log-row"><label>睡眠 1-5</label><input type="number" min="1" max="5" id="r-sleep"></div>
+    <div class="log-row"><label>壓力 1-5</label><input type="number" min="1" max="5" id="r-stress"></div>
+    <div class="log-row"><label>跳課原因</label><textarea id="r-miss" placeholder="有沒有跳課？為什麼？"></textarea></div>
+    <div class="log-row"><label>下週衝突</label><textarea id="r-next" placeholder="下週預知的行程衝突？"></textarea></div>
+    <button class="btn" onclick="saveReview()">存檔</button>
+    <button class="btn secondary" onclick="closeReview()">取消</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="template-modal" onclick="if(event.target===this)closeTemplate()">
+  <div class="modal">
+    <button class="close-btn" onclick="closeTemplate()">×</button>
+    <div class="modal-title" id="tpl-title"></div>
+    <div class="modal-detail" id="tpl-content"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="coach-modal" onclick="if(event.target===this)closeCoach()">
+  <div class="modal">
+    <button class="close-btn" onclick="closeCoach()">×</button>
+    <div class="modal-title">🎯 AI 訓練教練</div>
+    <div class="modal-date">專業教練 + 運動心理，協助身心備賽</div>
+    <div class="modal-detail">這個教練是 Claude Code 的 subagent，在 Mac mini / terminal 裡用。
+
+呼叫方式（在 Claude Code）：
+<code style="background:var(--bg);padding:0.1rem 0.3rem;border-radius:3px">Agent(training-coach)</code>
+
+教練會幫你做：
+• 每日課表調整（根據你的日誌）
+• 訓練問題諮詢（傷病、動作、配速、營養）
+• 心理技能訓練（視覺化、自我對話、壓力管理）
+• 週/Block 結束檢討 + 下階段規劃
+• 賽前減量策略 + 賽日心理準備
+
+也可以從 Telegram 呼叫：
+傳訊息「/coach 我今天腳踝有點怪怪的」→ 教練會讀你的日誌回覆
+
+詳情見 <code style="background:var(--bg);padding:0.1rem 0.3rem;border-radius:3px">.claude/agents/training-coach.md</code></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+
+const PLAN_START = new Date('2026-04-24');  // W0 開跑準備從今天開始
+const W1_START = new Date('2026-04-27');
+const HYROX_DATE = new Date('2026-10-15');
+const MARATHON_DATE = new Date('2026-12-20');
+
+const BLOCKS = [
+  { id: 'W0', name: 'On-ramp 開跑準備', range: 'W0', dates: '4/24-4/26', weeks: [0], focus: '設備設定 + 基線測試 + on-ramp', color: 'accent' },
+  { id: 'A', name: '基礎重建', range: 'W1-8', dates: '4/27-6/21', weeks: [1,2,3,4,5,6,7,8], focus: '有氧基底、踝穩定、HR 基線', color: 'accent' },
+  { id: 'B', name: '混合建構', range: 'W9-16', dates: '6/22-8/16', weeks: [9,10,11,12,13,14,15,16], focus: '長跑提量、居家 HYROX 1x/週', color: 'accent' },
+  { id: 'C1', name: 'HYROX 峰值', range: 'W17-22', dates: '8/17-9/27', weeks: [17,18,19,20,21,22], focus: '健身房 2x/週、HYROX 專項', color: 'hyrox' },
+  { id: 'C2', name: 'HYROX 鋒利 + Taper', range: 'W23-25', dates: '9/28-10/18', weeks: [23,24,25], focus: '減量 → 10/15 HYROX', color: 'hyrox' },
+  { id: 'D', name: '過渡恢復', range: 'W26', dates: '10/19-25', weeks: [26], focus: '完全恢復週', color: 'deload' },
+  { id: 'E', name: '馬拉松特化', range: 'W27-32', dates: '10/26-12/6', weeks: [27,28,29,30,31,32], focus: '長跑 32K×2 + MP 配速訓練', color: 'marathon' },
+  { id: 'F', name: '馬拉松 Taper', range: 'W33-34', dates: '12/7-12/20', weeks: [33,34], focus: '減量 → 12/20 台北馬', color: 'marathon' },
+];
+
+// 週間重複模板（所有 block 套用）
+const WEEK_TEMPLATE = {
+  '一': { type: 'rest', default: '休息 + OARC 例會' },
+  '二': { type: 'easy', default: 'Z2 easy run' },
+  '三': { type: 'strength', default: 'Easy + 肌力' },
+  '四': { type: 'strength', default: '肌力主課' },
+  '五': { type: 'quality', default: 'Quality（tempo/strides）' },
+  '六': { type: 'long', default: 'Long run' },
+  '日': { type: 'easy', default: 'Recovery / cross-train' },
+};
+
+// W0 開跑準備（4/24-4/26，3 天）
+const W0_PLAN = {
+  num: 0, block: 'W0', vol: 12, long: 8, dates: '4/24-4/26',
+  note: '🎯 開跑準備週（3 天）：銜接當前狀態到 W1 Mon 正式課',
+  highlights: ['🆕 啟動整個計畫', '🆕 設定 Zepp → Apple Health sync', '🆕 建立 HRV 基線'],
+  days: [
+    { dow: '五', type: 'easy', title: '4K easy + 設備', isNew: true, detail: '🆕 今天開始！\n\n早/晚擇一：\n• 4K easy run Z2（RPE 4-5，能講完整句）\n\n不跑步時做：\n• 設定 Zepp App → Apple Health sync（HRV、RHR、睡眠）\n• 晨測 HRV 第 1 天（一起床躺著量，連測 7 天取平均）\n• 準備補給：電解質粉 1 罐、能量膠 2-3 包試吃\n• 測試 5K 路線（家附近）' },
+    { dow: '六', type: 'long', title: '8K Z2 easy long', isNew: true, detail: '🆕 第一次 Z2 長跑（本計畫開始）\n\n目標：8K 全程 Z2\n• RPE 5 不要超過 6\n• 中途補水 300ml\n• 完跑紀錄：RPE、腳踝感受、感覺疲勞度\n\n這一次跑的感覺會變成未來 W1-8 配速依據' },
+    { dow: '日', type: 'easy', title: '2K shake + W1 準備', isNew: true, detail: '2K 超慢跑 shake-out（或游泳 30min）\n\nW1 開跑前清單：\n✓ 晨測 HRV（連續 7 天第 3 天）\n✓ 記錄起始體重 + 靜態心率\n✓ 看過本網頁「參考」頁的紅線規則\n✓ 準備訓練服、水壺、手錶電池' },
+  ]
+};
+
+const DAILY_PLANS = {
+  1: {
+    num: 1, block: 'A', vol: 25, long: 10, dates: '4/27-5/3',
+    note: 'Block A W1：正式開訓。重點是跑量從 W0 的 12km 推到 25km',
+    highlights: ['🆕 首次 10K 長跑', '🆕 首次 strides', '🆕 建立肌力模板'],
+    days: [
+      { dow: '一', type: 'rest', title: '休息', detail: '完全休息\n週一晚 OARC 例會' },
+      { dow: '二', type: 'easy', title: '5K easy Z2', isRepeat: true, detail: '套模板：Z2 easy\nRPE 4-5，鼻呼吸，講完整句' },
+      { dow: '三', type: 'strength', title: '5K + 力量 20min', isNew: true, detail: '🆕 第一次正式肌力（踝穩定主）：\n• 單腳站 3×30s（每腳）\n• 提踵 3×20\n• 單腳平衡板 3×20s\n• 死蟲 3×10（核心）\n\n跑：5K Z2' },
+      { dow: '四', type: 'strength', title: '力量 45min', isNew: true, detail: '🆕 肌力主課模板（Block A 全週沿用）：\n• 深蹲 3×12（穿負重背心）\n• 壺鈴硬舉 3×10（18kg）\n• 死蟲 3×10（每側）\n• 側棒 3×30s（每側）\n• 鳥狗 3×10' },
+      { dow: '五', type: 'quality', title: '4K + 6×30s strides', isNew: true, detail: '🆕 第一次 strides：\n4K easy 暖身\n接 6×30s strides：末段 200m 加速感，不衝刺\n組間 walk 回復' },
+      { dow: '六', type: 'long', title: '10K long Z2', isNew: true, detail: '🆕 長跑第一次破 10K：\n• RPE 5-6 Z2\n• 補水 500ml\n• 記錄：實際 RPE、腳踝、心率範圍' },
+      { dow: '日', type: 'easy', title: '2K shake / 游泳', isRepeat: true, detail: '超慢跑 2K 或 游泳 30min' },
+    ]
+  },
+  2: {
+    num: 2, block: 'A', vol: 28, long: 12, dates: '5/4-5/10',
+    note: '⚠️ 5/9 深坑活動 → 長跑移週日 5/10',
+    highlights: ['⚠️ 長跑日因活動改週日', '跑量 +12%'],
+    days: [
+      { dow: '一', type: 'rest', title: '休息', isRepeat: true, detail: 'OARC' },
+      { dow: '二', type: 'easy', title: '6K easy', isRepeat: true, detail: 'RPE 4-5' },
+      { dow: '三', type: 'strength', title: '5K + 力量 30min', isRepeat: true, detail: '基礎：踝穩定 + 核心（見📚模板 ankle-core）\n\n本週新增：壺鈴高腳杯深蹲 3×10（可調 12kg）\n\n先跑 5K Z2 再做肌力' },
+      { dow: '四', type: 'strength', title: '力量 45min', isRepeat: true, detail: '同 W1' },
+      { dow: '五', type: 'quality', title: '5K + 6×30s strides', isRepeat: true, detail: '-' },
+      { dow: '六', type: 'rest', title: '休（深坑活動）', isNew: true, detail: '⚠️ 5:30 出門前做 15min 動態伸展\n活動當晚不跑' },
+      { dow: '日', type: 'long', title: '12K long Z2', isNew: true, detail: '清晨跑、補水 + 1 包電解質\n⚠️ 活動隔天長跑，疲勞度要自評' },
+    ]
+  },
+  3: {
+    num: 3, block: 'A', vol: 32, long: 14, dates: '5/11-5/17',
+    highlights: ['🆕 末段 Z3 tempo 測試', '跑量 +14%'],
+    days: [
+      { dow: '一', type: 'rest', title: '休息', isRepeat: true, detail: 'OARC' },
+      { dow: '二', type: 'easy', title: '6K easy', isRepeat: true, detail: '-' },
+      { dow: '三', type: 'strength', title: '6K + 力量 30min', isNew: true, detail: '基礎：踝穩定 + 核心（見📚模板 ankle-core）\n\n🆕 本週新增：單腳硬舉 3×8（8kg 單手）\n\n先跑 6K Z2 再做肌力' },
+      { dow: '四', type: 'strength', title: '力量 45min', isRepeat: true, detail: '-' },
+      { dow: '五', type: 'quality', title: '5K + 8×30s strides', isRepeat: true, detail: '-' },
+      { dow: '六', type: 'long', title: '14K long Z2', isNew: true, detail: '中途補水一次\n🆕 末 2K 若腳踝無狀況可收 Z3 tempo（短句、有點喘）' },
+      { dow: '日', type: 'easy', title: '3K recovery', isRepeat: true, detail: '-' },
+    ]
+  },
+  4: {
+    num: 4, block: 'A', vol: 26, long: 11, dates: '5/18-5/24',
+    note: '⬇️ Deload 減量週',
+    highlights: ['⬇️ 第一次 deload（整體 −20%）', '⚠️ 5/24 設攤 → 長跑移週六 5/23'],
+    days: [
+      { dow: '一', type: 'rest', title: '休息', isRepeat: true, detail: 'OARC' },
+      { dow: '二', type: 'easy', title: '5K easy', isRepeat: true, detail: '強度 −20%' },
+      { dow: '三', type: 'strength', title: '4K + 力量 25min', isRepeat: true, detail: '基礎：踝穩定 + 核心（見📚模板 ankle-core），強度 −20%\n\n先跑 4K Z2 再做肌力' },
+      { dow: '四', type: 'strength', title: '力量 35min', isRepeat: true, detail: '降量' },
+      { dow: '五', type: 'quality', title: '4K + 4×20s strides', isRepeat: true, detail: '-' },
+      { dow: '六', type: 'long', title: '11K long 輕鬆', isNew: true, detail: '⚠️ 提前到週六\n末段無 tempo，純放鬆跑吸收前 3 週訓練' },
+      { dow: '日', type: 'rest', title: '休（設攤）', isNew: true, detail: '⚠️ 活動結束後散步 20min' },
+    ]
+  },
+  5: {
+    num: 5, block: 'A', vol: 33, long: 15, dates: '5/25-5/31',
+    highlights: ['🆕 首次補給測試', '🆕 加入抗旋轉'],
+    days: [
+      { dow: '一', type: 'rest', title: '休息', isRepeat: true, detail: '-' },
+      { dow: '二', type: 'easy', title: '6K easy', isRepeat: true, detail: '-' },
+      { dow: '三', type: 'strength', title: '6K + 力量 30min', isNew: true, detail: '基礎：踝穩定 + 核心（見📚模板 ankle-core）\n\n🆕 本週新增：壺鈴 swing 3×15（可調 14kg）\n\n先跑 6K Z2 再做肌力' },
+      { dow: '四', type: 'strength', title: '力量 50min', isNew: true, detail: '🆕 加上抗旋轉：Pallof press 彈力帶 3×12（每側）' },
+      { dow: '五', type: 'quality', title: '5K + 8×30s strides', isRepeat: true, detail: '-' },
+      { dow: '六', type: 'long', title: '15K long Z2', isNew: true, detail: '🔑 補給測試：中途試 1 包能量膠，熟悉補給感' },
+      { dow: '日', type: 'easy', title: '3K recovery', isRepeat: true, detail: '-' },
+    ]
+  },
+  6: {
+    num: 6, block: 'A', vol: 38, long: 17, dates: '6/1-6/7',
+    highlights: ['🆕 首次正式 tempo（2K Z3）'],
+    days: [
+      { dow: '一', type: 'rest', title: '休息', isRepeat: true, detail: '-' },
+      { dow: '二', type: 'easy', title: '7K easy', isRepeat: true, detail: '-' },
+      { dow: '三', type: 'strength', title: '7K + 力量 30min', isRepeat: true, detail: '基礎：踝穩定 + 核心（見📚模板 ankle-core），沿用 W5 結構\n\n先跑 7K Z2 再做肌力' },
+      { dow: '四', type: 'strength', title: '力量 50min', isRepeat: true, detail: '-' },
+      { dow: '五', type: 'quality', title: '6K：5K easy + 2K tempo', isNew: true, detail: '🆕 首次正式 tempo\n2K tempo RPE 6（短句程度，不能講完整句）' },
+      { dow: '六', type: 'long', title: '17K long Z2', isNew: true, detail: '🆕 可挑戰山徑（腳踝無狀況的話）\n帶 1 包膠 + 鹽錠' },
+      { dow: '日', type: 'easy', title: '4K recovery', isRepeat: true, detail: '-' },
+    ]
+  },
+  7: {
+    num: 7, block: 'A', vol: 42, long: 19, dates: '6/8-6/14',
+    note: '⭐ Block A 峰值週',
+    highlights: ['⭐ Block A 最長跑 19K', '🆕 3K tempo（擴展 tempo）'],
+    days: [
+      { dow: '一', type: 'rest', title: '休息', isRepeat: true, detail: '-' },
+      { dow: '二', type: 'easy', title: '8K easy', isRepeat: true, detail: '-' },
+      { dow: '三', type: 'strength', title: '7K + 力量 30min', isRepeat: true, detail: '基礎：踝穩定 + 核心（見📚模板 ankle-core），沿用 W5-6 結構\n\n先跑 7K Z2 再做肌力' },
+      { dow: '四', type: 'strength', title: '力量 50min', isRepeat: true, detail: '-' },
+      { dow: '五', type: 'quality', title: '6K + 3K tempo', isNew: true, detail: '🆕 擴展到 3K tempo RPE 6' },
+      { dow: '六', type: 'long', title: '19K long Z2', isNew: true, detail: '⭐ Block A 最長\n中段帶 1K Z3 感覺，末段 Z1 收' },
+      { dow: '日', type: 'easy', title: '4K recovery', isRepeat: true, detail: '-' },
+    ]
+  },
+  8: {
+    num: 8, block: 'A', vol: 32, long: 14, dates: '6/15-6/21',
+    note: '⬇️ Deload + Block A 總結週',
+    highlights: ['⬇️ Block A 收尾', '🆕 Block A Review（寫回饋讓教練展開 Block B）'],
+    days: [
+      { dow: '一', type: 'rest', title: '休息', isRepeat: true, detail: '-' },
+      { dow: '二', type: 'easy', title: '6K easy', isRepeat: true, detail: '-' },
+      { dow: '三', type: 'strength', title: '5K + 力量 25min', isRepeat: true, detail: '基礎：踝穩定 + 核心（見📚模板 ankle-core），deload 減量 -20%\n\n先跑 5K Z2 再做肌力' },
+      { dow: '四', type: 'strength', title: '力量 35min', isRepeat: true, detail: '減量' },
+      { dow: '五', type: 'quality', title: '4K + 4×20s strides', isRepeat: true, detail: '-' },
+      { dow: '六', type: 'long', title: '14K long 輕鬆', isRepeat: true, detail: '-' },
+      { dow: '日', type: 'easy', title: '3K + Block A Review', isNew: true, detail: '🆕 Block A 總結！\n• 填 Review 6 問\n• 呼叫 AI 教練：Agent(training-coach) "幫我展開 Block B 每日課表"\n• 教練會根據你 8 週數據寫 W9-16 細節' },
+    ]
+  },
+};
+
+// 週摘要（W9 以後未展開到日）
+const WEEK_SUMMARIES = {
+  9: { vol: 38, long: 17, note: 'Block B 開始，加入居家 HYROX 1x/週', highlights: ['🆕 HYROX 居家循環首次'] },
+  10: { vol: 42, long: 20 },
+  11: { vol: 45, long: 22 },
+  12: { vol: 35, long: 18, note: '⬇️ Deload' },
+  13: { vol: 44, long: 22 },
+  14: { vol: 47, long: 24 },
+  15: { vol: 48, long: 26, note: '⭐ Block B 峰值' },
+  16: { vol: 38, long: 19, note: '⬇️ Deload' },
+  17: { vol: 40, long: 20, note: '🏋️ 健身房開始，HYROX 2x/週', highlights: ['🆕 健身房 Simon 教練課開始'] },
+  18: { vol: 42, long: 22 },
+  19: { vol: 35, long: 18, note: '⬇️ Deload' },
+  20: { vol: 42, long: 24 },
+  21: { vol: 45, long: 24, note: 'HYROX 模擬' },
+  22: { vol: 38, long: 20 },
+  23: { vol: 30, long: 15, note: '最後鋒利' },
+  24: { vol: 25, long: 10, note: '⬇️ Taper -50%' },
+  25: { vol: 20, long: 0, note: '🔴 HYROX race 10/15', highlights: ['🔴 HYROX 台灣站比賽週'] },
+  26: { vol: 15, long: 0, note: '完全恢復，無強度' },
+  27: { vol: 35, long: 20, note: '🏃 馬拉松 build 開始', highlights: ['🆕 馬拉松專項期開始'] },
+  28: { vol: 42, long: 25 },
+  29: { vol: 48, long: 28, note: '🆕 首次 MP（marathon pace）訓練', highlights: ['🆕 MP 配速訓練'] },
+  30: { vol: 52, long: 32, note: '⭐ 峰值長跑 1 - 32K', highlights: ['⭐ 首次 32K 長跑'] },
+  31: { vol: 42, long: 22, note: '⬇️ Deload' },
+  32: { vol: 55, long: 32, note: '⭐ 峰值長跑 2 - 32K（含 8K MP）', highlights: ['⭐ 32K 長跑 + MP 8K（馬拉松最硬一週）'] },
+  33: { vol: 40, long: 22, note: '⬇️ Taper 1 -25%' },
+  34: { vol: 25, long: 0, note: '🔴 Marathon race 12/20', highlights: ['🔴 台北馬拉松比賽週'] },
+};
+
+// ============================================================
+// 模板庫（固定重複內容，日課表用 chip 連過來）
+// ============================================================
+
+const TEMPLATES = {
+  'strength-block-a': {
+    title: '💪 Block A 肌力主課 (每週四 45min)',
+    content: `適用：W1-W8 每週四（主課）\n\n• 深蹲 3×12（穿負重背心 10kg）\n• 壺鈴硬舉 3×10（可調壺鈴 16-18kg）\n• 死蟲 3×10（每側）\n• 側棒 3×30s（每側）\n• 鳥狗 3×10（每側）\n\n器材使用：\n• 可調壺鈴：硬舉 16-18kg、Goblet 深蹲 12-14kg\n• 固定 8kg：Turkish get-up、土耳其站立、單手 swing\n• 負重背心 10kg：深蹲外加負重\n\n進度調整：\n• W5+：加壺鈴 swing 3×15（可調 12-14kg）\n• W5+：加 Pallof press 彈力帶 3×12（抗旋轉）\n• W7+：加單腳硬舉 3×8（8kg 單手）`
+  },
+  'ankle-core': {
+    title: '🦶 Block A 踝穩定 + 核心 (每週三 20-30min)',
+    content: `適用：W1-W34 每週三（基礎課，永遠做）\n這是跑日間的「保險」，不是主要肌力課\n\n踝穩定（10-15min）：\n• 單腳站 3×30s（每腳、閉眼加難度）\n• 提踵 3×20\n• 單腳平衡板 3×20s（無則站毛巾捲）\n• 腳趾抓毛巾 3×20\n• 踝關節 4 向阻力彈力帶 3×10\n\n核心（10-15min）：\n• 死蟲 3×10（每側）\n• 側棒 3×30s（每側）\n• 鳥狗 3×10（每側）\n• 棒式 3×45s\n\n器材：8kg 壺鈴（單手 swing 3×10 做 warm-up）\n\n紅線：單腳站痛 > 3/10 → 停，改游泳，回報教練\n\n跟週四主課的差異：週三「短、頻、預防」；週四「長、重、發展」`
+  },
+  'strides': {
+    title: '⚡ Strides 6-8 × 30s',
+    content: `適用：W1-W34 每週五（easy 跑末段）\n\n執行：\n1. easy run 4-5K 暖身完\n2. 30 秒加速至 85% 速度（不衝刺）\n3. 走路或超慢 90 秒 recovery\n4. 重複 6-8 次\n\n重點：\n• 姿勢 > 速度：挺胸、步頻快、不過度跨步\n• 感覺「有力」不是「拼命」\n• 能維持完美姿勢才算有效\n\n進度：W1-4 6×30s → W5+ 8×30s`
+  },
+  'z2-pace': {
+    title: '🏃 Z2 配速範圍',
+    content: `Z2（有氧基礎）定義：\n• RPE 4-5（能講完整句子）\n• 心率 ≈ Max HR × 65-75%\n• 鼻呼吸 80% 時間\n\n起始估算（基底低）：\n• 第 1 週 Z2 約 6:30-7:00/km\n• 實際依 W1 第一次長跑修正\n\n訓練原則：\n• 80% 跑量待在這個區間\n• 最常見錯誤：跑太快，變成 Z3，累積疲勞\n• Z2 不是懶惰，是為了量能堆疊不受傷`
+  },
+  'tempo': {
+    title: '🔥 Tempo 執行',
+    content: `Tempo（乳酸閾值下）定義：\n• RPE 6（只能講短句）\n• 心率 ≈ Max HR × 80-87%\n• 對話會喘但能繼續\n\n執行：\n1. easy 3-5K 暖身\n2. tempo 段（2K → 3K → 5K 漸進）\n3. easy 3-5K 收操\n\n配速估算（3:15-3:20 馬拉松目標）：\n• MP（馬拉松配速）≈ 4:37-4:44/km\n• Tempo 比 MP 快 10-15s/km ≈ 4:22-4:29/km\n• 這只是起點，依實測調整\n\n週期：W6 首次 2K → W7 3K → Block B 5K → Block E 含 MP 訓練`
+  },
+  'long-run': {
+    title: '🛤️ 長跑執行',
+    content: `核心原則：配速「慢到懷疑人生」\n\n執行：\n• 全程 Z2 為主（RPE 5）\n• 補水：每 30min 200ml\n• 補給：超過 60min → 每 30min 1 包能量膠或 30g 碳水\n• 超過 90min → 加電解質錠\n\n路線選擇：\n• Block A：河濱 / 平路熟路線\n• Block B：30% 可加入輕度起伏\n• Block C1+：HYROX 期前少碎石，保踝\n• Block E：馬拉松比賽路線模擬為主\n\n後檢順序：腳踝感受 > RPE > 配速`
+  },
+  'hyrox-home': {
+    title: '🏋️ HYROX 居家循環 (Block B 每週四 60min)',
+    content: `適用：W9-W16 每週四\n\n暖身 10min：慢跑 + 動態伸展\n\n主課 4 站循環 × 2-3 輪：\n• A. Sled 替代：負重背心 10kg + 斜坡 walking 200m\n• B. Row 替代：8kg 壺鈴 swing 25 + 18kg 壺鈴高拉 10\n• C. 沙袋 lunges：沙袋 10 + 背心 10 = 20kg × 100m\n• D. Wall ball 替代：18kg thruster × 15（或可調 14kg × 18）\n\n組間 2-3min 緩步\n核心 10min 收尾（用週三模板的核心部分）\n\n器材配合可調壺鈴：\n• 輕量 8kg：高反覆 swing 模擬划船機心肺\n• 中量 14kg：thruster 替代 wall ball（爆發性較佳）\n• 重量 18kg：硬式 swing + 高拉模擬雪橇後側鏈\n\n不求速度，建立動作模式。W13 起可計時`
+  },
+  'review-6q': {
+    title: '📝 週日 Review 6 問',
+    content: `每週日 20:00 填（有提醒）\n\n1. 本週平均 RPE（1-10）？\n2. 腳踝疼痛（0-10，>3 紅線）？\n3. 睡眠品質（1-5）？\n4. 生活壓力（1-5）？\n5. 有沒有跳課？為什麼？\n6. 下週預知的行程衝突？\n\n填完後 AI 教練會根據回饋調下週課表`
+  },
+  'redlines': {
+    title: '🚨 紅線規則',
+    content: `立即停跑 / 強制調整：\n\n• 腳踝銳痛 > 3/10 → 改游泳/bike\n• HRV 連續 3 天 < 基線 -10% → 下次跑課降 Z1\n• 睡眠連 3 天 < 6hr → 減半當日運動量\n• ACWR > 1.5（近 7 天/近 28 天週平均）→ 強制減量週\n• 感冒/發燒 → 完全休 72hr 後才 30min easy\n• 體感疲憊 + 靜態心率 > 基線 +10 bpm → 改 Z1 或休`
+  },
+  'warmup': {
+    title: '🌀 暖身 5-10min（quality / long 前必做）',
+    content: `5min 動態伸展：\n• 腿擺前後 × 10（每腿）\n• 開合跳 × 20\n• 高抬腿 30s\n• 深蹲 × 10\n• 弓步走 × 10\n• 踝關節繞環 × 10（每腳）\n\n5min 漸進慢跑：\n• 走路 → 超慢跑 → 本日目標配速 -30s/km\n\n適用：quality 跑、長跑、HYROX 前必做\nEasy 跑可跳過，直接慢起`
+  },
+  'marathon-pace-goal': {
+    title: '🎯 馬拉松目標配速（3:15-3:20）',
+    content: `目標時間：3:15-3:20\n\n對應配速：\n• 3:15 → 4:37/km（5:00/km if 起跑配速）\n• 3:20 → 4:44/km\n• 均值 MP ≈ 4:40/km\n\nBlock E 訓練強度對照：\n• Easy / Z2：5:30-6:00/km（MP +50s）\n• Long run Z2：5:15-5:45/km\n• MP intervals：4:37-4:44/km（準確 MP）\n• Tempo：4:22-4:30/km（MP -10 到 -18s）\n• 800m intervals：4:00-4:10/km\n\n這只是起點，W8 結束後依實測微調`
+  }
+};
+
+function getTemplatesForDay(plan, weekNum) {
+  const chips = [];
+  const di = plan.dayIdx;
+  if (plan.type === 'strength') {
+    if (di === 2) {
+      // 週三 = 基礎踝穩定 + 核心
+      chips.push('ankle-core');
+    } else {
+      // 週四 = 主課
+      if (weekNum >= 1 && weekNum <= 8) chips.push('strength-block-a', 'ankle-core');
+      else if (weekNum >= 9 && weekNum <= 16) chips.push('hyrox-home', 'ankle-core');
+      else chips.push('strength-block-a', 'ankle-core');
+    }
+  }
+  if (plan.type === 'quality' && weekNum < 6) chips.push('strides', 'warmup');
+  if (plan.type === 'quality' && weekNum >= 6) chips.push('tempo', 'strides', 'warmup');
+  if (plan.type === 'quality' && weekNum >= 29) chips.push('marathon-pace-goal');
+  if (plan.type === 'long') chips.push('long-run', 'z2-pace', 'warmup');
+  if (plan.type === 'long' && weekNum >= 27) chips.push('marathon-pace-goal');
+  if (plan.type === 'easy') chips.push('z2-pace');
+  if (plan.type === 'hyrox') chips.push('hyrox-home');
+  return chips;
+}
+
+function openTemplate(id) {
+  const t = TEMPLATES[id];
+  if (!t) return;
+  document.getElementById('tpl-title').textContent = t.title;
+  document.getElementById('tpl-content').textContent = t.content;
+  document.getElementById('template-modal').classList.add('open');
+}
+function closeTemplate() { document.getElementById('template-modal').classList.remove('open'); }
+
+// ============================================================
+// STATE
+// ============================================================
+
+function getState() { try { return JSON.parse(localStorage.getItem('outrun_training_v2') || '{}'); } catch(e) { return {}; } }
+function saveState(s) { localStorage.setItem('outrun_training_v2', JSON.stringify(s)); }
+
+// ============================================================
+// Cloud Sync (Google Apps Script Web App)
+// ============================================================
+
+const CLOUD = {
+  url() { return getState().cloudConfig?.url || ''; },
+  token() { return getState().cloudConfig?.token || 'outrun-training-2026-buzz'; },
+
+  async _post(body) {
+    const url = this.url();
+    if (!url) return { skipped: true };
+    try {
+      const r = await fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ token: this.token(), ...body })
+      });
+      return await r.json();
+    } catch (e) {
+      console.warn('[cloud] POST failed:', e.message);
+      return { ok: false, error: e.message };
+    }
+  },
+  async _get(params) {
+    const url = this.url();
+    if (!url) return { skipped: true };
+    try {
+      const u = new URL(url);
+      u.searchParams.set('token', this.token());
+      Object.entries(params).forEach(([k, v]) => u.searchParams.set(k, v));
+      const r = await fetch(u.toString(), { method: 'GET', mode: 'cors', redirect: 'follow' });
+      return await r.json();
+    } catch (e) {
+      console.warn('[cloud] GET failed:', e.message);
+      return { ok: false, error: e.message };
+    }
+  },
+
+  ping() { return this._get({ action: 'ping' }); },
+  pull() { return this._get({ action: 'pull' }); },
+  saveLog(date, data) { return this._post({ action: 'saveLog', date, data }); },
+  setDone(date, value, weekNum) { return this._post({ action: 'setDone', date, value, weekNum }); },
+  saveReview(weekNum, data) { return this._post({ action: 'saveReview', weekNum, data }); },
+  saveBadge(id) { return this._post({ action: 'saveBadge', id }); },
+  bulkSave(data) { return this._post({ action: 'bulkSave', data }); },
+};
+
+async function cloudConfigure() {
+  const cur = getState().cloudConfig?.url || '';
+  const url = window.prompt('Apps Script Web App URL:\n（部署後 .../exec 結尾）', cur);
+  if (!url) return;
+  const s = getState();
+  s.cloudConfig = { url: url.trim(), token: 'outrun-training-2026-buzz' };
+  saveState(s);
+  showToast('設定完成，測試連線...');
+  const pong = await CLOUD.ping();
+  if (!pong.ok) {
+    alert('連線失敗：' + (pong.error || '未回應') + '\n請確認 URL、部署權限、token');
+    return;
+  }
+  showToast('連線成功 ✓');
+  if (window.confirm('要把本機資料批次上傳到 Sheet 嗎？\n（第一次連接建議做）')) {
+    await cloudBulkPush();
+  }
+  await cloudPull();
+}
+
+async function cloudBulkPush() {
+  const s = getState();
+  showToast('批次上傳中...');
+  const r = await CLOUD.bulkSave({
+    logs: s.logs || {},
+    done: s.done || {},
+    reviews: s.reviews || {},
+    badges: s.badges || {},
+  });
+  if (r.ok) {
+    const c = r.data?.counts || {};
+    showToast(`上傳完成：日 ${c.logs||0} / 完成 ${c.done||0} / 週 ${c.reviews||0} / 徽 ${c.badges||0}`);
+  } else {
+    showToast('上傳失敗：' + (r.error || '未知'));
+  }
+}
+
+async function cloudPull() {
+  if (!CLOUD.url()) return;
+  const r = await CLOUD.pull();
+  if (!r.ok) {
+    console.warn('[cloud] pull failed:', r.error);
+    return;
+  }
+  mergeCloudData(r.data || {});
+  const s = getState();
+  s.lastCloudSync = new Date().toISOString();
+  saveState(s);
+  renderAll();
+}
+
+function mergeCloudData(cloud) {
+  const s = getState();
+  s.logs = s.logs || {};
+  s.done = s.done || {};
+  s.reviews = s.reviews || {};
+  s.badges = s.badges || {};
+
+  (cloud.daily || []).forEach(row => {
+    if (!row.date) return;
+    const date = String(row.date).slice(0, 10);
+    const existing = s.logs[date] || {};
+    s.logs[date] = { ...existing };
+    ['rpe', 'km', 'ankle', 'hrv', 'rhr', 'sleep_hr', 'deep_sleep_hr',
+     'duration_min', 'pace', 'notes', 'strava_id'].forEach(k => {
+      if (row[k] !== '' && row[k] !== null && row[k] !== undefined) {
+        s.logs[date][k] = row[k];
+      }
+    });
+    if (row.strava_id) s.logs[date].stravaId = row.strava_id;
+    if (row.done === true || row.done === 'TRUE') {
+      s.done[date] = row.doneAt || new Date().toISOString();
+    }
+  });
+
+  (cloud.weekly || []).forEach(row => {
+    if (row.weekNum === '' || row.weekNum === null || row.weekNum === undefined) return;
+    const wn = String(row.weekNum);
+    s.reviews[wn] = {
+      rpe: row.rpe, ankle: row.ankle, sleep: row.sleep,
+      stress: row.stress, miss: row.miss, next: row.nextWeek,
+      savedAt: row.savedAt
+    };
+  });
+
+  (cloud.badges || []).forEach(row => {
+    if (row.id) s.badges[row.id] = { unlockedAt: row.unlockedAt };
+  });
+
+  saveState(s);
+}
+
+function cloudDisconnect() {
+  if (!window.confirm('斷開雲端同步？本機資料會保留，Sheet 資料也會保留。')) return;
+  const s = getState();
+  s.cloudConfig = null;
+  saveState(s);
+  showToast('已斷開雲端');
+  renderAll();
+}
+function cloudToast(r) {
+  if (!r || r.skipped || r.ok) return;
+  const s = getState();
+  s.cloudPendingErrors = (s.cloudPendingErrors || 0) + 1;
+  saveState(s);
+  showToast('⚠️ 雲端未同步（' + (r.error || '未知') + '）');
+  renderCloudStatus();
+}
+
+function isDone(dateStr) { return !!(getState().done || {})[dateStr]; }
+function setDone(dateStr, v) {
+  const s = getState(); s.done = s.done || {};
+  if (v) s.done[dateStr] = new Date().toISOString(); else delete s.done[dateStr];
+  saveState(s);
+  const d = new Date(dateStr); const w = weekNumForDate(d);
+  CLOUD.setDone(dateStr, v, w).then(cloudToast).catch(e => cloudToast({ok:false,error:e.message}));
+}
+function getLog(dateStr) { return (getState().logs || {})[dateStr] || {}; }
+function setLog(dateStr, log) {
+  const s = getState(); s.logs = s.logs || {}; s.logs[dateStr] = log; saveState(s);
+  const d = new Date(dateStr); const w = weekNumForDate(d);
+  CLOUD.saveLog(dateStr, { ...log, weekNum: w }).then(cloudToast).catch(e => cloudToast({ok:false,error:e.message}));
+}
+function getReview(weekNum) { return (getState().reviews || {})[weekNum] || {}; }
+function setReview(weekNum, r) {
+  const s = getState(); s.reviews = s.reviews || {}; s.reviews[weekNum] = r; saveState(s);
+  CLOUD.saveReview(weekNum, r).then(cloudToast).catch(e => cloudToast({ok:false,error:e.message}));
+}
+
+// ============================================================
+// 里程碑（Milestones / Badges）
+// ============================================================
+
+const MILESTONES = [
+  { id: 'first-5k', name: '🏅 首次 5K', desc: 'Log 首次 ≥ 5K', type: 'km', min: 5 },
+  { id: 'first-10k', name: '🏅 首次 10K', desc: 'W1 長跑目標', type: 'km', min: 10 },
+  { id: 'first-14k', name: '🏅 首次 14K', desc: 'W3 長跑', type: 'km', min: 14 },
+  { id: 'first-19k', name: '🏅 Block A 峰值 19K', desc: 'W7 最長跑', type: 'km', min: 19 },
+  { id: 'first-tempo', name: '🔥 首次 Tempo', desc: 'W6 首次 2K Z3', type: 'day-kind', match: (p, w) => p.type === 'quality' && w >= 6 },
+  { id: 'hyrox-circuit', name: '🏋️ HYROX 循環首次', desc: 'Block B W9+ strength day', type: 'day-kind', match: (p, w) => p.type === 'strength' && w >= 9 && w <= 16 },
+  { id: 'first-25k', name: '🏅 25K 長跑', desc: 'Block B 長跑峰值', type: 'km', min: 25 },
+  { id: 'first-30k', name: '🏅 30K 長跑', desc: 'Block E 峰值', type: 'km', min: 30 },
+  { id: 'first-32k', name: '🏅 32K (馬拉松 76%)', desc: 'W30/W32 peak', type: 'km', min: 32 },
+  { id: 'block-a-done', name: '🎯 Block A 完成', desc: '8 週基礎', type: 'week-done', week: 8 },
+  { id: 'block-b-done', name: '🎯 Block B 完成', desc: '16 週混合建構', type: 'week-done', week: 16 },
+  { id: 'block-c-done', name: '🎯 HYROX Peak 完成', desc: 'W22', type: 'week-done', week: 22 },
+  { id: 'hyrox-race', name: '🏆 HYROX 台灣站', desc: '10/15', type: 'week-done', week: 25 },
+  { id: 'marathon-race', name: '🏆 台北馬拉松', desc: '12/20', type: 'week-done', week: 34 },
+  { id: 'streak-4w', name: '🔥 4 週連勝 >80%', desc: '連續 4 週完成率 > 80%', type: 'streak', weeks: 4, ratio: 0.8 },
+  { id: 'streak-10w', name: '🔥 10 週連勝 >80%', desc: '連續 10 週 > 80%', type: 'streak', weeks: 10, ratio: 0.8 },
+];
+
+function checkMilestones(silent = false) {
+  const s = getState();
+  s.badges = s.badges || {};
+  const logs = s.logs || {};
+  const done = s.done || {};
+  const newly = [];
+
+  MILESTONES.forEach(m => {
+    if (s.badges[m.id]) return;
+    let unlocked = false;
+
+    if (m.type === 'km') {
+      unlocked = Object.values(logs).some(l => parseFloat(l?.km || 0) >= m.min);
+    } else if (m.type === 'day-kind') {
+      for (const ds of Object.keys(done)) {
+        const date = new Date(ds);
+        const w = weekNumForDate(date);
+        if (w < 0) continue;
+        const di = dayIdxInWeek(date, w);
+        const p = getDayPlan(w, di);
+        if (p && m.match(p, w)) { unlocked = true; break; }
+      }
+    } else if (m.type === 'week-done') {
+      const maxDays = m.week === 0 ? 3 : 7;
+      let ok = true, any = false;
+      for (let d = 0; d < maxDays; d++) {
+        const date = dateForWeekDay(m.week, d);
+        const p = getDayPlan(m.week, d);
+        if (p && p.type !== 'rest') {
+          any = true;
+          if (!isDone(dateStr(date))) { ok = false; break; }
+        }
+      }
+      unlocked = any && ok;
+    } else if (m.type === 'streak') {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const curW = weekNumForDate(today);
+      let streak = 0;
+      for (let w = curW - 1; w >= 0; w--) {
+        const c = getWeekCompliance(w);
+        if (c.ratio !== null && c.ratio >= m.ratio) streak++;
+        else break;
+      }
+      unlocked = streak >= m.weeks;
+    }
+    if (unlocked) {
+      s.badges[m.id] = { unlockedAt: new Date().toISOString() };
+      newly.push(m);
+      CLOUD.saveBadge(m.id).catch(()=>{});
+    }
+  });
+  saveState(s);
+  if (!silent && newly.length) {
+    newly.forEach((m, i) => setTimeout(() => showToast(`🎉 解鎖：${m.name}`), i * 1800));
+  }
+  return newly;
+}
+
+// ============================================================
+// 當日 briefing（教練口吻提醒）
+// ============================================================
+
+function getBriefing(plan, weekNum, dayIdx) {
+  if (!plan) return null;
+  if (plan.type === 'rest') return '休息 = 訓練的一部分。今天好好睡，肌肉在睡覺時才長。';
+  const t = plan.title || '';
+
+  if (weekNum === 0 && dayIdx === 0) return '今天開跑。4K 不是小數目，是「開始比完美重要」的證明。';
+  if (weekNum === 0 && plan.type === 'long') return '這次 8K 會變成未來所有 Z2 配速的基準。慢到能完整講話才對。';
+  if (plan.isNew && plan.type === 'long') return '🔑 首次這個距離。配速慢到懷疑人生 = 對的。完賽是唯一目標。';
+  if (plan.isNew && t.includes('tempo')) return '🔥 首次 tempo。RPE 6 是北極星，不要追配速。喘到無法講短句就慢下來。';
+  if (plan.isNew && plan.type === 'strength') return '🆕 新肌力模板。前 2 週先確認動作，重量不是重點。';
+  if (t.includes('補給')) return '🔑 補給測試：帶膠試吃，觀察會不會脹氣 / 反胃。真比賽用才發現就慘了。';
+  if (weekNum === 30 && plan.type === 'long') return '⭐ 馬拉松 peak long 1：32K 純 Z2。能輕鬆完成 = 沙發上的心安。';
+  if (weekNum === 32 && plan.type === 'long') return '⭐ 最硬一週：32K 含 8K MP。這是全期訓練的測驗。配速 4:37-4:44/km。';
+  if (weekNum >= 29 && plan.type === 'quality') return 'MP 訓練窗口。目標 4:37-4:44/km。準確 > 快。';
+  if (weekNum === 25) return '🏆 HYROX 比賽週。相信訓練，分 8 站跑：穩、穩、穩、穩、穩、穩、穩、收。';
+  if (weekNum === 34) return '🏆 馬拉松比賽週。分 4 段：0-10 保守、10-25 節奏、25-35 專注、35-42 放空全給。';
+  if (plan.type === 'easy') return '80/20 的 80 在這裡。跑太快 = 訓練最常見的錯誤。';
+  if (plan.type === 'strength') return '肌力是跑步的保險。不做 = 傷病風險 +30%。';
+  if (plan.type === 'quality') return 'Quality 課：暖身 5-10min 不能省。姿勢 > 速度。';
+  if (plan.type === 'long') return '長跑日。補水、補給、注意腳踝。配速「慢到能跟人聊」。';
+  return null;
+}
+
+// ============================================================
+// 完成率 compliance（週）
+// ============================================================
+
+function getWeekCompliance(w) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const maxDays = w === 0 ? 3 : 7;
+  let scheduled = 0, completed = 0;
+  for (let d = 0; d < maxDays; d++) {
+    const date = dateForWeekDay(w, d);
+    if (date > today) continue;
+    const p = getDayPlan(w, d);
+    if (!p || p.type === 'rest') continue;
+    scheduled++;
+    if (isDone(dateStr(date))) completed++;
+  }
+  if (scheduled === 0) return { ratio: null, cls: '', label: '未開始' };
+  const ratio = completed / scheduled;
+  if (ratio >= 0.9) return { ratio, cls: 'comp-green', tag: 'comp-green-bg', label: `${completed}/${scheduled}` };
+  if (ratio >= 0.6) return { ratio, cls: 'comp-yellow', tag: 'comp-yellow-bg', label: `${completed}/${scheduled}` };
+  return { ratio, cls: 'comp-red', tag: 'comp-red-bg', label: `${completed}/${scheduled}` };
+}
+
+// ============================================================
+// 調整今日課表（Not Feeling 100%）
+// ============================================================
+
+const ADJ_LABEL = { z1: 'Z1 輕鬆版', rest: '休息', defer: '遞延一天', cancel: '取消' };
+
+function applyAdjustment(dateStr, type, reason = '') {
+  const s = getState();
+  s.adjustments = s.adjustments || {};
+  s.adjustments[dateStr] = { type, reason, at: new Date().toISOString() };
+  saveState(s);
+  showToast(`已套用：${ADJ_LABEL[type]}`);
+  renderAll();
+}
+function getAdjustment(ds) { return (getState().adjustments || {})[ds]; }
+function clearAdjustment(ds) {
+  const s = getState(); if (!s.adjustments) return;
+  delete s.adjustments[ds]; saveState(s); renderAll();
+}
+
+// ============================================================
+// 日課交換（swap）
+// ============================================================
+
+let swapContext = null;
+
+function initiateSwap(w, d, ev) {
+  if (ev) ev.stopPropagation();
+  if (swapContext) {
+    if (swapContext.w === w && swapContext.d === d) { swapContext = null; renderWeek(); return; }
+    swapDays(swapContext.w, swapContext.d, w, d);
+    swapContext = null;
+    renderAll();
+    showToast('已交換');
+  } else {
+    swapContext = { w, d };
+    showToast('選擇另一天交換（再點一次取消）');
+    renderWeek();
+  }
+}
+function swapDays(w1, d1, w2, d2) {
+  const s = getState();
+  s.overrides = s.overrides || {};
+  s.overrides[w1] = s.overrides[w1] || {};
+  s.overrides[w2] = s.overrides[w2] || {};
+  const p1orig = s.overrides[w1][d1] || getRawDayPlan(w1, d1);
+  const p2orig = s.overrides[w2][d2] || getRawDayPlan(w2, d2);
+  s.overrides[w1][d1] = p2orig;
+  s.overrides[w2][d2] = p1orig;
+  saveState(s);
+}
+
+// ============================================================
+// 週日 Summary
+// ============================================================
+
+function generateWeekSummary(weekNum) {
+  const maxDays = weekNum === 0 ? 3 : 7;
+  let totalKm = 0, totalRPE = 0, rpeCount = 0, doneCount = 0, scheduledCount = 0;
+  const redlines = [];
+  for (let d = 0; d < maxDays; d++) {
+    const date = dateForWeekDay(weekNum, d);
+    const ds = dateStr(date);
+    const p = getDayPlan(weekNum, d);
+    const log = getLog(ds);
+    if (p && p.type !== 'rest') scheduledCount++;
+    if (isDone(ds)) doneCount++;
+    if (log?.km) totalKm += parseFloat(log.km);
+    if (log?.rpe) { totalRPE += parseFloat(log.rpe); rpeCount++; }
+    if (log?.ankle && parseFloat(log.ankle) > 3) redlines.push(`腳踝 ${log.ankle} (${date.getMonth()+1}/${date.getDate()})`);
+  }
+  const wd = getWeekData(weekNum);
+  return {
+    weekNum,
+    planned: wd?.vol || 0,
+    totalKm: totalKm.toFixed(1),
+    avgRPE: rpeCount ? (totalRPE/rpeCount).toFixed(1) : '-',
+    completion: scheduledCount ? Math.round(doneCount/scheduledCount*100) : 0,
+    redlines,
+    doneCount, scheduledCount
+  };
+}
+
+function renderSunSummary() {
+  const container = document.getElementById('sun-summary-container');
+  if (!container) return;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dow = today.getDay();
+  if (dow !== 0) { container.innerHTML = ''; return; }
+  const w = weekNumForDate(today);
+  if (w < 1 || w > 34) { container.innerHTML = ''; return; }
+  const s = generateWeekSummary(w);
+  const nextW = getWeekData(w + 1);
+  container.innerHTML = `
+    <div class="sun-summary">
+      <div class="s-title">📊 W${w} 週末 Summary</div>
+      <div class="s-row"><span>計畫里程</span><strong>${s.planned}km</strong></div>
+      <div class="s-row"><span>實際里程</span><strong>${s.totalKm}km</strong></div>
+      <div class="s-row"><span>完成率</span><strong>${s.completion}% (${s.doneCount}/${s.scheduledCount})</strong></div>
+      <div class="s-row"><span>平均 RPE</span><strong>${s.avgRPE}</strong></div>
+      <div class="s-row"><span>紅線觸發</span><strong>${s.redlines.length} 次</strong></div>
+      ${nextW ? `<div class="s-row" style="border-bottom:none;margin-top:0.5rem;color:var(--muted)"><span>下週預告</span><strong>W${w+1} · ${nextW.vol}km / 長跑 ${nextW.long}K${nextW.note ? ' · ' + nextW.note : ''}</strong></div>` : ''}
+      <button class="btn" style="margin-top:0.7rem" onclick="openWeeklyReview()">填寫 6 題 Review</button>
+      <button class="btn secondary" onclick="askCoach('weekly')">🎯 問教練建議</button>
+    </div>
+  `;
+}
+
+// ============================================================
+// 全程大圖（34 週視覺化）
+// ============================================================
+
+function drawPlanChart() {
+  const c = document.getElementById('chart-full-plan');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const w = c.width = c.clientWidth;
+  const h = c.height;
+  ctx.clearRect(0, 0, w, h);
+  const bw = (w - 20) / 35;
+  const maxVol = 60;
+  const topPad = 30, botPad = 25;
+  for (let i = 0; i <= 34; i++) {
+    const data = getWeekData(i);
+    const vol = data?.vol || 0;
+    const long = data?.long || 0;
+    const x = 10 + i * bw;
+    const block = getBlockForWeek(i);
+    let color = '#64748b';
+    if (block?.color === 'accent') color = '#f97316';
+    if (block?.color === 'hyrox') color = '#3b82f6';
+    if (block?.color === 'marathon') color = '#10b981';
+    if (block?.color === 'deload') color = '#475569';
+    const bh = (vol / maxVol) * (h - topPad - botPad);
+    ctx.fillStyle = color + '60';
+    ctx.fillRect(x, h - bh - botPad, bw - 1.5, bh);
+    const lh = (long / maxVol) * (h - topPad - botPad);
+    ctx.fillStyle = color;
+    ctx.fillRect(x, h - lh - botPad, bw - 1.5, lh);
+    if (i % 5 === 0 || i === 34) {
+      ctx.fillStyle = '#94a3b8'; ctx.font = '9px sans-serif';
+      ctx.fillText(`W${i}`, x, h - 8);
+    }
+  }
+  // Race markers
+  ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2;
+  const hyroxX = 10 + 25 * bw + bw/2;
+  ctx.beginPath(); ctx.moveTo(hyroxX, topPad-15); ctx.lineTo(hyroxX, h-botPad); ctx.stroke();
+  ctx.fillStyle = '#ef4444'; ctx.font = 'bold 10px sans-serif';
+  ctx.fillText('🔴 HYROX', hyroxX - 25, topPad - 5);
+  const marX = 10 + 34 * bw + bw/2;
+  ctx.beginPath(); ctx.moveTo(marX, topPad-15); ctx.lineTo(marX, h-botPad); ctx.stroke();
+  ctx.fillText('🔴 台北馬', marX - 45, topPad - 5);
+  // Today marker
+  const today = new Date(); today.setHours(0,0,0,0);
+  const curW = weekNumForDate(today);
+  if (curW >= 0 && curW <= 34) {
+    const tx = 10 + curW * bw + bw/2;
+    ctx.strokeStyle = '#eab308'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(tx, topPad); ctx.lineTo(tx, h-botPad); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+}
+
+// ============================================================
+// 問教練（Tier 3 #8）
+// ============================================================
+
+function askCoach(context = 'general') {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const w = weekNumForDate(today);
+  const state = getState();
+  const recentLogs = {};
+  for (let i = 0; i <= 13; i++) {
+    const d = addDays(today, -i);
+    const ds = dateStr(d);
+    if (state.logs?.[ds]) recentLogs[ds] = state.logs[ds];
+  }
+  const summary = (w >= 1 && w <= 34) ? generateWeekSummary(w) : null;
+  const contextStr = summary ?
+    `W${w} 計畫 ${summary.planned}km / 實際 ${summary.totalKm}km, 完成率 ${summary.completion}%, 平均 RPE ${summary.avgRPE}, 紅線 ${summary.redlines.length} 次` :
+    'Pre-W1';
+  const prompt = `Agent(training-coach) "${context === 'weekly' ? '請 review 我本週表現並建議下週調整' : '請根據近 14 天 log 給建議'}。\\n${contextStr}\\n近 14 天 log: ${JSON.stringify(recentLogs).slice(0, 1500)}"`;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(prompt).then(() => {
+      showToast('已複製。貼到 Claude Code terminal');
+    }).catch(() => {
+      prompt_(prompt);
+    });
+  } else {
+    prompt_(prompt);
+  }
+}
+function prompt_(s) { window.prompt('複製這段貼到 Claude Code：', s); }
+
+// ============================================================
+// Strava 同步（Tier 3 #9）
+// ============================================================
+
+async function stravaSync() {
+  const s = getState();
+  let token = s.strava?.token;
+  if (!token) {
+    token = window.prompt('請貼上 Strava Access Token:\n取得：https://www.strava.com/settings/api\n（建立 App → My API Application → Access Token）');
+    if (!token) return;
+    const nx = getState(); nx.strava = { token, lastSync: null }; saveState(nx);
+  }
+  try {
+    const since = Math.floor((Date.now() - 14 * 86400000) / 1000);
+    const r = await fetch(`https://www.strava.com/api/v3/athlete/activities?after=${since}&per_page=50`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (r.status === 401) {
+      const nx = getState(); nx.strava = null; saveState(nx);
+      alert('Token 失效。請重新取得。');
+      return;
+    }
+    if (!r.ok) throw new Error('API ' + r.status);
+    const activities = await r.json();
+    let matched = 0;
+    activities.forEach(a => {
+      if (!['Run', 'TrailRun', 'VirtualRun'].includes(a.type)) return;
+      const ds = a.start_date_local.slice(0, 10);
+      const ex = getLog(ds);
+      const pace = a.average_speed > 0 ? ((1000 / a.average_speed) / 60) : 0;
+      const paceStr = pace > 0 ? `${Math.floor(pace)}:${String(Math.round((pace - Math.floor(pace)) * 60)).padStart(2, '0')}/km` : '';
+      setLog(ds, {
+        ...ex,
+        km: (a.distance / 1000).toFixed(2),
+        duration_min: Math.round(a.moving_time / 60),
+        pace: paceStr,
+        stravaId: a.id,
+        stravaName: a.name,
+        notes: (ex.notes || '') + (ex.notes ? '' : '') // keep existing
+      });
+      matched++;
+    });
+    const nx = getState(); nx.strava = { token, lastSync: new Date().toISOString() }; saveState(nx);
+    showToast(`已同步 ${matched} 筆 Strava 活動`);
+    renderAll();
+  } catch(e) {
+    alert('Strava 同步失敗：' + e.message);
+  }
+}
+
+function stravaDisconnect() {
+  const s = getState(); s.strava = null; saveState(s);
+  showToast('已斷開 Strava');
+  renderAll();
+}
+
+// ============================================================
+// 原始 day plan（不經 override）
+// ============================================================
+function getRawDayPlan(weekNum, dayIdx) {
+  if (weekNum === 0) return W0_PLAN.days[dayIdx] ? { ...W0_PLAN.days[dayIdx] } : null;
+  const week = DAILY_PLANS[weekNum];
+  if (week) return { ...week.days[dayIdx] };
+  const summary = WEEK_SUMMARIES[weekNum];
+  if (summary) {
+    const dows = ['一','二','三','四','五','六','日'];
+    return {
+      dow: dows[dayIdx], isRepeat: true,
+      type: dayIdx === 5 ? 'long' : (dayIdx === 0 ? 'rest' : 'easy'),
+      title: dayIdx === 0 ? '休息' : (dayIdx === 5 ? `長跑 ${summary.long}K` : '套模板'),
+      detail: `Block 尚未展開到日\n週里程 ${summary.vol}km · 長跑 ${summary.long}K\n${summary.note || ''}\n\nBlock 前一週會由 AI 教練根據實際表現展開。`
+    };
+  }
+  return null;
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+function dateStr(d) { return d.toISOString().slice(0, 10); }
+function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
+function daysBetween(a, b) { return Math.round((b - a) / 86400000); }
+
+function weekNumForDate(d) {
+  const diff = daysBetween(W1_START, d);
+  if (diff < -3) return -1;
+  if (diff < 0) return 0;
+  return Math.floor(diff / 7) + 1;
+}
+function dayIdxInWeek(d, weekNum) {
+  if (weekNum === 0) return daysBetween(PLAN_START, d);
+  return daysBetween(addDays(W1_START, (weekNum - 1) * 7), d);
+}
+
+function getDayPlan(weekNum, dayIdx) {
+  const state = getState();
+  const override = state.overrides?.[weekNum]?.[dayIdx];
+  if (override) return { ...override, weekNum, dayIdx, isSwapped: true };
+  const raw = getRawDayPlan(weekNum, dayIdx);
+  if (!raw) return null;
+  return { ...raw, weekNum, dayIdx };
+}
+function getBlockForWeek(w) { return BLOCKS.find(b => b.weeks.includes(w)); }
+function dateForWeekDay(weekNum, dayIdx) {
+  if (weekNum === 0) return addDays(PLAN_START, dayIdx);
+  return addDays(W1_START, (weekNum - 1) * 7 + dayIdx);
+}
+function getWeekData(w) {
+  if (w === 0) return W0_PLAN;
+  return DAILY_PLANS[w] || WEEK_SUMMARIES[w];
+}
+
+const TYPE_ICON = { rest: '😴', easy: '🏃', strength: '💪', quality: '⚡', long: '🛤️', hyrox: '🏋️', race: '🏁' };
+const TYPE_COLOR = { rest: 'type-rest', easy: 'type-easy', strength: 'type-strength', quality: 'type-quality', long: 'type-long', hyrox: 'type-hyrox', race: 'type-race' };
+
+// ============================================================
+// UI
+// ============================================================
+
+let currentWeek = 1;
+
+function renderCountdown() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const toHyrox = daysBetween(today, HYROX_DATE);
+  const toMarathon = daysBetween(today, MARATHON_DATE);
+  const w = weekNumForDate(today);
+  document.getElementById('countdown').innerHTML = `
+    <span class="accent">${w === 0 ? 'W0 開跑週' : `W${w}`}</span>
+    <span class="hyrox">HYROX D-${toHyrox}</span>
+    <span class="marathon">台北馬 D-${toMarathon}</span>
+  `;
+}
+
+function renderToday() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const w = weekNumForDate(today);
+  const container = document.getElementById('today-content');
+
+  if (w === -1 || w > 34) {
+    container.innerHTML = `<div class="card today-hero"><div class="workout-title">🎉 範圍外</div><div class="workout-detail">目前日期不在計畫範圍。</div></div>`;
+    return;
+  }
+  const dayIdx = dayIdxInWeek(today, w);
+  const plan = getDayPlan(w, dayIdx);
+  if (!plan) {
+    container.innerHTML = `<div class="card today-hero"><div class="workout-title">今天無課</div></div>`;
+    renderCompletionStats(); return;
+  }
+  const date = dateForWeekDay(w, dayIdx);
+  const ds = dateStr(date);
+  const done = isDone(ds);
+  const block = getBlockForWeek(w);
+  const weekData = getWeekData(w);
+  const newBadge = plan.isNew ? '<span class="new-badge">🆕 NEW</span>' : '';
+  const repeatBadge = plan.isRepeat ? '<span class="repeat-badge">模板</span>' : '';
+  const swapBadge = plan.isSwapped ? '<span class="adjustment-badge">已交換</span>' : '';
+  const adj = getAdjustment(ds);
+  const adjBadge = adj ? `<span class="adjustment-badge">${ADJ_LABEL[adj.type] || '已調整'}</span>` : '';
+  const briefing = getBriefing(plan, w, dayIdx);
+  const todayLog = getLog(ds);
+  const healthMeta = [];
+  if (todayLog.hrv) healthMeta.push(`💗 HRV ${todayLog.hrv}`);
+  if (todayLog.rhr) healthMeta.push(`RHR ${todayLog.rhr}`);
+  if (todayLog.sleep_hr) healthMeta.push(`😴 ${parseFloat(todayLog.sleep_hr).toFixed(1)}hr`);
+
+  container.innerHTML = `
+    <div class="card today-hero" onclick="openModal(${w}, ${dayIdx})">
+      <div class="date">${date.toLocaleDateString('zh-TW', {year:'numeric', month:'long', day:'numeric', weekday:'long'})}</div>
+      <div class="workout-title">${TYPE_ICON[plan.type] || '🏃'} ${plan.title} ${newBadge}${repeatBadge}${swapBadge}${adjBadge} ${done ? '✓' : ''}</div>
+      ${briefing ? `<div class="briefing-box"><span class="b-label">🎯 教練提醒</span>${briefing}</div>` : ''}
+      ${healthMeta.length ? `<div class="week-meta" style="margin-top:0.4rem">${healthMeta.map(m=>`<span>${m}</span>`).join('')}</div>` : ''}
+      <div class="workout-detail">${plan.detail || ''}</div>
+      <div class="week-meta">
+        <span>W${w} · ${block?.name || ''}</span>
+        <span>週量 ${weekData?.vol || '-'}km</span>
+        <span>長跑 ${weekData?.long || '-'}K</span>
+      </div>
+    </div>
+    ${adj ? `<div class="card" style="border-left:3px solid var(--warning)"><div class="card-sub">已套用調整：<strong>${ADJ_LABEL[adj.type]}</strong> · <button class="chip" onclick="clearAdjustment('${ds}')">還原</button></div></div>` : `
+    <div class="card">
+      <div class="card-title">🩺 今天狀況不好？</div>
+      <div class="card-sub">一鍵調整今日課表（HRV 低、疲憊、時間不夠都適用）</div>
+      <div class="adjust-row">
+        <button onclick="applyAdjustment('${ds}','z1')">改 Z1 輕鬆版</button>
+        <button onclick="applyAdjustment('${ds}','rest')">完全休息</button>
+        <button onclick="applyAdjustment('${ds}','defer')">遞延一天</button>
+        <button onclick="applyAdjustment('${ds}','cancel')">取消課表</button>
+      </div>
+    </div>
+    `}
+  `;
+  renderCompletionStats();
+  renderNextSunday();
+}
+
+function renderNextSunday() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dow = today.getDay();
+  const daysUntilSun = (7 - dow) % 7 || 7;
+  const sun = addDays(today, daysUntilSun);
+  document.getElementById('next-sunday').textContent = `${sun.getMonth()+1}/${sun.getDate()}`;
+}
+
+function renderCompletionStats() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  let done = 0, total = 0;
+  for (let i = 6; i >= 0; i--) {
+    const d = addDays(today, -i);
+    const w = weekNumForDate(d);
+    if (w < 0 || w > 34) continue;
+    const di = dayIdxInWeek(d, w);
+    const plan = getDayPlan(w, di);
+    if (plan && plan.type !== 'rest') { total++; if (isDone(dateStr(d))) done++; }
+  }
+  const pct = total === 0 ? 0 : Math.round(done / total * 100);
+  document.getElementById('completion-stats').innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-value">${done}/${total}</div><div class="stat-label">完成次數</div></div>
+      <div class="stat-card"><div class="stat-value">${pct}%</div><div class="stat-label">完成率</div></div>
+    </div>
+  `;
+}
+
+function renderWeek() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const block = getBlockForWeek(currentWeek);
+  const wData = getWeekData(currentWeek);
+  document.getElementById('week-title').textContent = `W${currentWeek} · ${block?.name || ''}`;
+
+  const dates = wData?.dates || block?.dates || '';
+  document.getElementById('week-meta').innerHTML = `
+    <div class="card-sub">${dates} · 週量 ${wData?.vol || '-'}km · 長跑 ${wData?.long || '-'}K</div>
+    ${wData?.note ? `<div class="card-sub" style="color:var(--accent)">${wData.note}</div>` : ''}
+  `;
+
+  const hl = wData?.highlights;
+  document.getElementById('week-highlights').innerHTML = hl && hl.length ? `
+    <div class="highlights-box">
+      <div class="h-title">🔔 本週新進度 / 調整</div>
+      <ul>${hl.map(h => `<li>${h}</li>`).join('')}</ul>
+    </div>
+  ` : '';
+
+  document.getElementById('week-template').innerHTML = `
+    <div class="template-box">
+      <div class="t-title">📋 本週重複模板（Mon→Sun）</div>
+      休 · Z2 easy · Easy+力量 · 力量主 · Quality · <strong style="color:var(--marathon)">Long</strong> · Recovery
+    </div>
+  `;
+
+  populateWeekSelector();
+  const grid = document.getElementById('week-grid');
+  grid.innerHTML = '';
+  const maxDays = currentWeek === 0 ? 3 : 7;
+  for (let i = 0; i < maxDays; i++) {
+    const plan = getDayPlan(currentWeek, i);
+    if (!plan) continue;
+    const date = dateForWeekDay(currentWeek, i);
+    const ds = dateStr(date);
+    const isToday = dateStr(today) === ds;
+    const done = isDone(ds);
+    const isSwapTarget = swapContext && swapContext.w === currentWeek && swapContext.d === i;
+    const cell = document.createElement('div');
+    cell.className = `day-cell ${isToday ? 'today' : ''} ${done ? 'done' : ''} ${plan.isNew ? 'has-new' : ''} ${isSwapTarget ? 'swap-selected' : ''}`;
+    const swapHint = swapContext && !isSwapTarget ? '<span class="swap-btn">選這天換</span>' : '';
+    cell.innerHTML = `
+      ${swapHint}
+      <div class="dow">${plan.dow} · ${date.getMonth()+1}/${date.getDate()}${plan.isSwapped ? ' 🔄' : ''}</div>
+      <div class="type ${TYPE_COLOR[plan.type]}">${TYPE_ICON[plan.type] || ''}</div>
+      <div class="title">${plan.title}${plan.isNew ? ' <span class="new-badge">NEW</span>' : ''}</div>
+    `;
+    cell.onclick = () => {
+      if (swapContext) { initiateSwap(currentWeek, i); }
+      else openModal(currentWeek, i);
+    };
+    grid.appendChild(cell);
+  }
+}
+
+function changeWeek(delta) {
+  currentWeek = Math.max(0, Math.min(34, currentWeek + delta));
+  renderWeek();
+}
+function jumpToWeek(w) {
+  currentWeek = Math.max(0, Math.min(34, parseInt(w) || 0));
+  switchTab('week');
+}
+function populateWeekSelector() {
+  const sel = document.getElementById('week-selector');
+  if (!sel) return;
+  sel.innerHTML = '';
+  for (let w = 0; w <= 34; w++) {
+    const block = getBlockForWeek(w);
+    const data = getWeekData(w);
+    const label = `W${w} · ${block?.name || ''} · ${data?.dates || ''}`;
+    const opt = document.createElement('option');
+    opt.value = w; opt.textContent = label;
+    if (w === currentWeek) opt.selected = true;
+    sel.appendChild(opt);
+  }
+}
+
+function renderPlan() {
+  const container = document.getElementById('blocks-container');
+  container.innerHTML = '';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const currentW = weekNumForDate(today);
+
+  BLOCKS.forEach(block => {
+    const header = document.createElement('div');
+    header.className = `block-header ${block.color}`;
+    header.innerHTML = `<div><h3>Block ${block.id} · ${block.name}</h3><div class="meta">${block.range} · ${block.dates} · ${block.focus}</div></div>`;
+    container.appendChild(header);
+    block.weeks.forEach(w => {
+      const data = getWeekData(w);
+      if (!data) return;
+      const badges = [];
+      if (data.note?.includes('Deload') || data.note?.includes('deload') || data.note?.includes('⬇')) badges.push('<span class="deload-badge">deload</span>');
+      if (data.note?.includes('峰值') || data.note?.includes('⭐')) badges.push('<span class="peak-badge">peak</span>');
+      if (data.note?.includes('🔴')) badges.push('<span class="peak-badge" style="background:var(--danger)">race</span>');
+      const comp = getWeekCompliance(w);
+      if (comp.ratio !== null) badges.push(`<span class="comp-indicator ${comp.tag}">${comp.label}</span>`);
+      const row = document.createElement('div');
+      row.className = `week-row ${w === currentW ? 'current' : ''} ${comp.cls}`;
+      row.innerHTML = `
+        <div class="wk">W${w}</div>
+        <div>
+          <div>${data.dates || ''} ${badges.join('')}</div>
+          ${data.note ? `<div style="color:var(--muted);font-size:0.72rem;margin-top:0.2rem">${data.note}</div>` : ''}
+        </div>
+        <div class="vol">${data.vol || '-'}km</div>
+        <div class="long">長 ${data.long || '-'}K</div>
+      `;
+      row.onclick = () => { currentWeek = w; switchTab('week'); };
+      container.appendChild(row);
+    });
+  });
+}
+
+// ============================================================
+// TRENDS
+// ============================================================
+
+function drawBarChart(canvasId, data, color) {
+  const c = document.getElementById(canvasId);
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const w = c.width = c.clientWidth;
+  const h = c.height;
+  ctx.clearRect(0, 0, w, h);
+  if (!data.length) { ctx.fillStyle = '#94a3b8'; ctx.font = '12px sans-serif'; ctx.fillText('尚未有資料', 10, 20); return; }
+  const max = Math.max(...data.map(d => d.value || 0), 1);
+  const bw = w / data.length - 3;
+  data.forEach((d, i) => {
+    const x = i * (bw + 3);
+    const bh = (d.value / max) * (h - 30);
+    ctx.fillStyle = d.planned ? '#475569' : color;
+    ctx.fillRect(x, h - bh - 20, bw, bh);
+    ctx.fillStyle = '#94a3b8'; ctx.font = '9px sans-serif';
+    if (i % Math.ceil(data.length / 10) === 0) ctx.fillText(d.label, x, h - 5);
+  });
+}
+
+function renderTrends() {
+  const state = getState();
+  const logs = state.logs || {};
+  const volData = [];
+  const rpeData = [];
+  const ankleData = [];
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  for (let w = 0; w <= 34; w++) {
+    const maxDays = w === 0 ? 3 : 7;
+    let weekActualKm = 0, weekPlannedKm = 0;
+    for (let d = 0; d < maxDays; d++) {
+      const date = dateForWeekDay(w, d);
+      const ds = dateStr(date);
+      if (date > today) continue;
+      const plan = getDayPlan(w, d);
+      const log = logs[ds];
+      if (log?.km) weekActualKm += parseFloat(log.km);
+      if (log?.rpe) rpeData.push({ label: `${date.getMonth()+1}/${date.getDate()}`, value: parseFloat(log.rpe) });
+      if (log?.ankle !== undefined && log.ankle !== '') ankleData.push({ label: `${date.getMonth()+1}/${date.getDate()}`, value: parseFloat(log.ankle) });
+    }
+    const wd = getWeekData(w);
+    if (wd?.vol && dateForWeekDay(w, 0) <= today) {
+      volData.push({ label: `W${w}`, value: weekActualKm || wd.vol, planned: weekActualKm === 0 });
+    }
+  }
+
+  drawBarChart('chart-volume', volData, '#f97316');
+  drawBarChart('chart-rpe', rpeData.slice(-21), '#ef4444');
+  drawBarChart('chart-ankle', ankleData.slice(-21), '#eab308');
+
+  const acwrData = computeACWR(logs);
+  drawBarChart('chart-acwr', acwrData, '#3b82f6');
+
+  const hrvData = [], sleepData = [];
+  const sortedDates = Object.keys(logs).sort();
+  sortedDates.slice(-28).forEach(ds => {
+    const l = logs[ds];
+    const d = new Date(ds);
+    const label = `${d.getMonth()+1}/${d.getDate()}`;
+    if (l?.hrv) hrvData.push({ label, value: parseFloat(l.hrv) });
+    if (l?.sleep_hr) sleepData.push({ label, value: parseFloat(l.sleep_hr) });
+  });
+  drawBarChart('chart-hrv', hrvData, '#ec4899');
+  drawBarChart('chart-sleep', sleepData, '#8b5cf6');
+}
+
+function renderCloudStatus() {
+  const lblEl = document.getElementById('cloud-status-label');
+  const statEl = document.getElementById('cloud-status');
+  if (!lblEl || !statEl) return;
+  const cfg = getState().cloudConfig;
+  if (!cfg?.url) {
+    lblEl.textContent = '❌ 未設定';
+    statEl.textContent = '點「設定 URL」開始';
+    return;
+  }
+  lblEl.textContent = '✅ 已連接';
+  const last = getState().lastCloudSync;
+  statEl.textContent = last ? `最後同步：${new Date(last).toLocaleString('zh-TW')}` : '尚未拉取';
+}
+
+function computeACWR(logs) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const result = [];
+  for (let i = 27; i >= 0; i--) {
+    const d = addDays(today, -i);
+    let sum7 = 0, sum28 = 0;
+    for (let j = 0; j < 7; j++) {
+      const dd = addDays(d, -j);
+      const ds = dateStr(dd);
+      const l = logs[ds];
+      if (l?.rpe && l?.km) sum7 += parseFloat(l.rpe) * parseFloat(l.km);
+    }
+    for (let j = 0; j < 28; j++) {
+      const dd = addDays(d, -j);
+      const ds = dateStr(dd);
+      const l = logs[ds];
+      if (l?.rpe && l?.km) sum28 += parseFloat(l.rpe) * parseFloat(l.km);
+    }
+    const ratio = sum28 > 0 ? (sum7 / (sum28 / 4)) : 0;
+    result.push({ label: `${d.getMonth()+1}/${d.getDate()}`, value: ratio });
+  }
+  return result;
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+
+let modalContext = null;
+
+function openModal(weekNum, dayIdx) {
+  const plan = getDayPlan(weekNum, dayIdx);
+  if (!plan) return;
+  const date = dateForWeekDay(weekNum, dayIdx);
+  const ds = dateStr(date);
+  modalContext = { weekNum, dayIdx, dateStr: ds };
+  const newBadge = plan.isNew ? '<span class="new-badge">🆕 NEW</span>' : '';
+  const repeatBadge = plan.isRepeat ? '<span class="repeat-badge">模板</span>' : '';
+  document.getElementById('modal-title').innerHTML = `${TYPE_ICON[plan.type] || ''} ${plan.title} ${newBadge}${repeatBadge}`;
+  document.getElementById('modal-date').textContent = `W${weekNum} · ${date.toLocaleDateString('zh-TW', {month:'long', day:'numeric', weekday:'long'})}`;
+  document.getElementById('modal-detail').textContent = plan.detail || '';
+  const tplIds = getTemplatesForDay(plan, weekNum);
+  const chipsEl = document.getElementById('modal-chips');
+  if (tplIds.length) {
+    chipsEl.innerHTML = '<span class="chip-label">📚 模板：</span>' + tplIds.map(id =>
+      `<span class="chip" onclick="openTemplate('${id}')">${TEMPLATES[id].title}</span>`
+    ).join('') + `<span class="chip" onclick="openTemplate('redlines')">🚨 紅線規則</span>`;
+  } else {
+    chipsEl.innerHTML = `<span class="chip-label">📚 模板：</span><span class="chip" onclick="openTemplate('redlines')">🚨 紅線規則</span>`;
+  }
+  const log = getLog(ds);
+  document.getElementById('log-rpe').value = log.rpe || '';
+  document.getElementById('log-km').value = log.km || '';
+  document.getElementById('log-pace').value = log.pace || '';
+  document.getElementById('log-ankle').value = log.ankle || '';
+  document.getElementById('log-hrv').value = log.hrv || '';
+  document.getElementById('log-rhr').value = log.rhr || '';
+  document.getElementById('log-sleep').value = log.sleep_hr || '';
+  document.getElementById('log-notes').value = log.notes || '';
+  const doneBtn = document.getElementById('done-btn');
+  doneBtn.textContent = isDone(ds) ? '✓ 已完成（點擊取消）' : '標記完成';
+  doneBtn.className = isDone(ds) ? 'btn done' : 'btn';
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  modalContext = null;
+  renderAll();
+}
+function toggleDone() {
+  if (!modalContext) return;
+  setDone(modalContext.dateStr, !isDone(modalContext.dateStr));
+  checkMilestones();
+  openModal(modalContext.weekNum, modalContext.dayIdx);
+}
+function saveLog() {
+  if (!modalContext) return;
+  const existing = getLog(modalContext.dateStr);
+  const payload = { ...existing };
+  // 空欄位跳過不覆蓋，避免吃掉 Apple Health 自動灌的 HRV/RHR/sleep
+  const fieldMap = {
+    'rpe': 'log-rpe', 'km': 'log-km', 'pace': 'log-pace', 'ankle': 'log-ankle',
+    'hrv': 'log-hrv', 'rhr': 'log-rhr', 'sleep_hr': 'log-sleep', 'notes': 'log-notes'
+  };
+  Object.entries(fieldMap).forEach(([key, id]) => {
+    const v = document.getElementById(id).value;
+    if (v !== '' && v !== null && v !== undefined) payload[key] = v;
+  });
+  setLog(modalContext.dateStr, payload);
+  checkMilestones();
+  showToast('已存檔（同步雲端中）');
+}
+function modalAdjust(type) {
+  if (!modalContext) return;
+  applyAdjustment(modalContext.dateStr, type);
+  closeModal();
+}
+function modalClearAdjust() {
+  if (!modalContext) return;
+  clearAdjustment(modalContext.dateStr);
+  showToast('已還原');
+  closeModal();
+}
+
+function openWeeklyReview() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const w = weekNumForDate(today);
+  const r = getReview(w);
+  document.getElementById('review-date').textContent = `W${w} Review`;
+  document.getElementById('r-rpe').value = r.rpe || '';
+  document.getElementById('r-ankle').value = r.ankle || '';
+  document.getElementById('r-sleep').value = r.sleep || '';
+  document.getElementById('r-stress').value = r.stress || '';
+  document.getElementById('r-miss').value = r.miss || '';
+  document.getElementById('r-next').value = r.next || '';
+  document.getElementById('review-modal').classList.add('open');
+}
+function closeReview() { document.getElementById('review-modal').classList.remove('open'); }
+function saveReview() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const w = weekNumForDate(today);
+  setReview(w, {
+    rpe: document.getElementById('r-rpe').value,
+    ankle: document.getElementById('r-ankle').value,
+    sleep: document.getElementById('r-sleep').value,
+    stress: document.getElementById('r-stress').value,
+    miss: document.getElementById('r-miss').value,
+    next: document.getElementById('r-next').value,
+    savedAt: new Date().toISOString()
+  });
+  closeReview(); showToast('Review 已存');
+}
+
+function openCoach() { document.getElementById('coach-modal').classList.add('open'); }
+function closeCoach() { document.getElementById('coach-modal').classList.remove('open'); }
+
+// ============================================================
+// EXPORT / IMPORT
+// ============================================================
+
+function exportICS() {
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Outrun//Training//TW', 'CALSCALE:GREGORIAN'];
+  for (let w = 0; w <= 34; w++) {
+    const maxDays = w === 0 ? 3 : 7;
+    for (let d = 0; d < maxDays; d++) {
+      const plan = getDayPlan(w, d);
+      if (!plan || plan.type === 'rest') continue;
+      const date = dateForWeekDay(w, d);
+      const dstr = dateStr(date).replace(/-/g, '');
+      const uid = `outrun-w${w}-d${d}@training`;
+      lines.push('BEGIN:VEVENT', `UID:${uid}`, `DTSTART;VALUE=DATE:${dstr}`,
+        `SUMMARY:${plan.title}`, `DESCRIPTION:${(plan.detail || '').replace(/\n/g, '\\n')}`, 'END:VEVENT');
+    }
+  }
+  lines.push('END:VCALENDAR');
+  const blob = new Blob([lines.join('\r\n')], { type: 'text/calendar' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'outrun-training.ics'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('已匯出 .ics');
+}
+
+function exportJSON() {
+  const data = JSON.stringify(getState(), null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `outrun-training-${dateStr(new Date())}.json`; a.click();
+  URL.revokeObjectURL(url);
+  showToast('已匯出資料');
+}
+
+function importJSON() {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'application/json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try { saveState(JSON.parse(ev.target.result)); renderAll(); showToast('已匯入'); }
+      catch(e) { alert('匯入失敗：' + e.message); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--marathon);color:#000;padding:0.6rem 1.2rem;border-radius:8px;font-weight:600;z-index:200;box-shadow:0 4px 12px rgba(0,0,0,0.3)';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 1800);
+}
+
+// ============================================================
+// TABS
+// ============================================================
+
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+  document.querySelectorAll('section').forEach(s => s.classList.toggle('active', s.id === id));
+  if (id === 'week') renderWeek();
+  if (id === 'today') renderToday();
+  if (id === 'plan') { renderPlan(); setTimeout(drawPlanChart, 50); }
+  if (id === 'trends') renderTrends();
+  if (id === 'ref') { renderBadges(); renderStravaStatus(); renderTemplateList(); }
+}
+document.querySelectorAll('.tab-btn').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
+
+// ============================================================
+// INIT
+// ============================================================
+
+function renderTemplateList() {
+  const el = document.getElementById('ref-template-chips');
+  if (!el) return;
+  el.innerHTML = Object.keys(TEMPLATES).map(id =>
+    `<span class="chip" onclick="openTemplate('${id}')">${TEMPLATES[id].title}</span>`
+  ).join('');
+}
+function renderBadges() {
+  const el = document.getElementById('badge-grid');
+  if (!el) return;
+  const s = getState();
+  const badges = s.badges || {};
+  el.innerHTML = MILESTONES.map(m => {
+    const got = badges[m.id];
+    const date = got ? new Date(got.unlockedAt).toLocaleDateString('zh-TW', {month:'numeric', day:'numeric'}) : '';
+    return `<div class="badge ${got ? 'unlocked' : 'locked'}" title="${m.desc}">
+      <div class="b-name">${m.name}</div>
+      <div class="b-date">${got ? `🗓 ${date}` : m.desc}</div>
+    </div>`;
+  }).join('');
+}
+function renderStravaStatus() {
+  const el = document.getElementById('strava-status');
+  if (!el) return;
+  const s = getState();
+  if (s.strava?.lastSync) {
+    const d = new Date(s.strava.lastSync);
+    el.textContent = `✅ 已連接 · 最後同步：${d.toLocaleString('zh-TW')}`;
+  } else {
+    el.textContent = '未連接';
+  }
+}
+function renderAll() {
+  renderCountdown(); renderToday(); renderWeek(); renderPlan(); renderTrends();
+  renderTemplateList(); renderBadges(); renderStravaStatus(); renderSunSummary();
+  renderCloudStatus();
+  drawPlanChart();
+  checkMilestones(true);
+}
+currentWeek = Math.max(0, Math.min(34, weekNumForDate(new Date())));
+renderAll();
+window.addEventListener('resize', () => { renderTrends(); drawPlanChart(); });
+// 若已設定雲端 → 啟動時拉一次
+if (getState().cloudConfig?.url) {
+  setTimeout(() => cloudPull().catch(()=>{}), 500);
+}
+</script>
+</body>
+</html>
