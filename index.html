@@ -561,7 +561,7 @@
       <div class="log-row"><label>腳踝 0-10</label><input type="number" min="0" max="10" id="log-ankle"></div>
       <div class="log-row"><label>HRV（手填）</label><input type="number" id="log-hrv" placeholder="若無自動同步"></div>
       <div class="log-row"><label>RHR（手填）</label><input type="number" id="log-rhr"></div>
-      <div class="log-row"><label>睡眠 hr</label><input type="number" step="0.1" id="log-sleep"></div>
+      <div class="log-row"><label>睡眠時長</label><input type="text" id="log-sleep" placeholder="7:45 或 7.75（小時）"></div>
       <div class="log-row"><label>備註</label><textarea id="log-notes" placeholder="怎麼感覺、地形、天氣..."></textarea></div>
       <button class="btn secondary" onclick="saveLog()">存檔</button>
     </div>
@@ -892,6 +892,28 @@ function closeTemplate() { document.getElementById('template-modal').classList.r
 
 function getState() { try { return JSON.parse(localStorage.getItem('outrun_training_v2') || '{}'); } catch(e) { return {}; } }
 function saveState(s) { localStorage.setItem('outrun_training_v2', JSON.stringify(s)); }
+
+// Sleep time parser/formatter (accept "7:45" or "7.75" → store decimal)
+function parseSleepHours(input) {
+  if (input === null || input === undefined || input === '') return '';
+  const s = String(input).trim();
+  if (s.includes(':')) {
+    const parts = s.split(':');
+    const h = parseInt(parts[0]) || 0;
+    const m = parseInt(parts[1]) || 0;
+    return (h + m / 60).toFixed(2);
+  }
+  const n = parseFloat(s);
+  return isNaN(n) ? '' : n.toString();
+}
+function formatSleepHours(hours) {
+  if (hours === null || hours === undefined || hours === '') return '';
+  const n = parseFloat(hours);
+  if (isNaN(n)) return '';
+  const h = Math.floor(n);
+  const m = Math.round((n - h) * 60);
+  return `${h}:${String(m).padStart(2, '0')}`;
+}
 
 // ============================================================
 // Cloud Sync (Google Apps Script Web App)
@@ -1589,7 +1611,7 @@ function renderToday() {
   const healthMeta = [];
   if (todayLog.hrv) healthMeta.push(`💗 HRV ${todayLog.hrv}`);
   if (todayLog.rhr) healthMeta.push(`RHR ${todayLog.rhr}`);
-  if (todayLog.sleep_hr) healthMeta.push(`😴 ${parseFloat(todayLog.sleep_hr).toFixed(1)}hr`);
+  if (todayLog.sleep_hr) healthMeta.push(`😴 ${formatSleepHours(todayLog.sleep_hr)}`);
 
   container.innerHTML = `
     <div class="card today-hero" onclick="openModal(${w}, ${dayIdx})">
@@ -1908,7 +1930,7 @@ function openModal(weekNum, dayIdx) {
   document.getElementById('log-ankle').value = log.ankle || '';
   document.getElementById('log-hrv').value = log.hrv || '';
   document.getElementById('log-rhr').value = log.rhr || '';
-  document.getElementById('log-sleep').value = log.sleep_hr || '';
+  document.getElementById('log-sleep').value = log.sleep_hr ? formatSleepHours(log.sleep_hr) : '';
   document.getElementById('log-notes').value = log.notes || '';
   const doneBtn = document.getElementById('done-btn');
   doneBtn.textContent = isDone(ds) ? '✓ 已完成（點擊取消）' : '標記完成';
@@ -1936,7 +1958,8 @@ function saveLog() {
     'hrv': 'log-hrv', 'rhr': 'log-rhr', 'sleep_hr': 'log-sleep', 'notes': 'log-notes'
   };
   Object.entries(fieldMap).forEach(([key, id]) => {
-    const v = document.getElementById(id).value;
+    let v = document.getElementById(id).value;
+    if (key === 'sleep_hr') v = parseSleepHours(v);
     if (v !== '' && v !== null && v !== undefined) payload[key] = v;
   });
   setLog(modalContext.dateStr, payload);
