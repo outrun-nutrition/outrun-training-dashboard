@@ -1964,7 +1964,8 @@ function saveLog() {
   });
   setLog(modalContext.dateStr, payload);
   checkMilestones();
-  showToast('已存檔（同步雲端中）');
+  showToast('✓ 已存檔');
+  closeModal();
 }
 function modalAdjust(type) {
   if (!modalContext) return;
