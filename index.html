@@ -423,14 +423,25 @@
 
   <div class="card">
     <div class="card-title">🎯 AI 教練快速呼叫</div>
-    <div class="card-sub">複製當前 context 給 training-coach agent</div>
+    <div class="card-sub">兩條路：dashboard 複製 prompt OR Telegram 直接對話</div>
     <div class="coach-box">
-      <strong>一鍵問教練</strong>（會複製 prompt 到剪貼簿）：
+      <strong>📋 從這裡複製 prompt 給 Claude Code</strong>：
       <div class="tool-row">
         <button class="btn secondary" onclick="askCoach('general')">🎯 問近期狀況</button>
         <button class="btn secondary" onclick="askCoach('weekly')">📊 本週 review 建議</button>
       </div>
-      <div style="color:var(--muted);font-size:0.75rem;margin-top:0.5rem">貼到 terminal：<code style="background:var(--bg);padding:0.1rem 0.3rem;border-radius:3px">claude</code> 後貼 prompt</div>
+    </div>
+    <div class="coach-box" style="margin-top:0.5rem">
+      <strong>📱 Telegram 直接對話（推薦）</strong>
+      <div style="color:var(--muted);font-size:0.78rem;margin-top:0.4rem;line-height:1.65">
+        傳訊息含「HRV / RPE / 腳踝 / 跑步 / 配速 / HYROX / 馬拉松 / 課表」等關鍵字 → Mac mini Claude 自動 route 給教練 agent。<br><br>
+        <strong>對話範例：</strong><br>
+        • 「今早 HRV 38 比平均低 24%，怎麼調？」<br>
+        • 「跑完了，5K easy RPE 4 腳踝 1」（教練會自動寫雲端 log）<br>
+        • 「下週出差北京 5 天，課表怎辦」<br>
+        • 「腳踝今天 4，要停跑嗎？」<br><br>
+        教練會：拉雲端最新資料 → 給建議 → 必要時改課表（單日 adjust 教你按按鈕、結構變動會徵詢同意才動 git push）
+      </div>
     </div>
   </div>
 
