@@ -288,7 +288,7 @@
   <div class="header-top">
     <div>
       <div class="title">🏃 Outrun Training 2026</div>
-      <div class="subtitle">HYROX 10/15 (1:15) · 台北馬 12/20 (sub-3:15)</div>
+      <div class="subtitle">HYROX 10/15 → 1:15 · 台北馬 12/20 → sub-3:15</div>
     </div>
     <button class="coach-btn" onclick="openCoach()">🎯 教練</button>
   </div>
@@ -423,25 +423,14 @@
 
   <div class="card">
     <div class="card-title">🎯 AI 教練快速呼叫</div>
-    <div class="card-sub">兩條路：dashboard 複製 prompt OR Telegram 直接對話</div>
+    <div class="card-sub">複製當前 context 給 training-coach agent</div>
     <div class="coach-box">
-      <strong>📋 從這裡複製 prompt 給 Claude Code</strong>：
+      <strong>一鍵問教練</strong>（會複製 prompt 到剪貼簿）：
       <div class="tool-row">
         <button class="btn secondary" onclick="askCoach('general')">🎯 問近期狀況</button>
         <button class="btn secondary" onclick="askCoach('weekly')">📊 本週 review 建議</button>
       </div>
-    </div>
-    <div class="coach-box" style="margin-top:0.5rem">
-      <strong>📱 Telegram 直接對話（推薦）</strong>
-      <div style="color:var(--muted);font-size:0.78rem;margin-top:0.4rem;line-height:1.65">
-        傳訊息含「HRV / RPE / 腳踝 / 跑步 / 配速 / HYROX / 馬拉松 / 課表」等關鍵字 → Mac mini Claude 自動 route 給教練 agent。<br><br>
-        <strong>對話範例：</strong><br>
-        • 「今早 HRV 38 比平均低 24%，怎麼調？」<br>
-        • 「跑完了，5K easy RPE 4 腳踝 1」（教練會自動寫雲端 log）<br>
-        • 「下週出差北京 5 天，課表怎辦」<br>
-        • 「腳踝今天 4，要停跑嗎？」<br><br>
-        教練會：拉雲端最新資料 → 給建議 → 必要時改課表（單日 adjust 教你按按鈕、結構變動會徵詢同意才動 git push）
-      </div>
+      <div style="color:var(--muted);font-size:0.75rem;margin-top:0.5rem">貼到 terminal：<code style="background:var(--bg);padding:0.1rem 0.3rem;border-radius:3px">claude</code> 後貼 prompt</div>
     </div>
   </div>
 
@@ -675,17 +664,17 @@ const W0_PLAN = {
 
 const DAILY_PLANS = {
   1: {
-    num: 1, block: 'A', vol: 25, long: 10, dates: '4/27-5/3',
-    note: 'Block A W1：正式開訓。重點是跑量從 W0 的 12km 推到 25km',
-    highlights: ['🆕 首次 10K 長跑', '🆕 首次 strides', '🆕 建立肌力模板'],
+    num: 1, block: 'A', vol: 22, long: 12, dates: '4/27-5/3',
+    note: '⚠️ W1 腳踝調整版（4/26 痛 5、4/28 走路微痛）：tempo/strides 砍、長跑縮 12K Z2、週日休',
+    highlights: ['⚠️ 腳踝紅線調整', '🆕 首次 12K Z2（縮版）', '🆕 建立肌力模板'],
     days: [
       { dow: '一', type: 'rest', title: '休息', detail: '完全休息\n週一晚 OARC 例會' },
-      { dow: '二', type: 'easy', title: '5K easy Z2', isRepeat: true, detail: '套模板：Z2 easy\nRPE 4-5，鼻呼吸，講完整句' },
-      { dow: '三', type: 'strength', title: '5K + 力量 20min', isNew: true, detail: '🆕 第一次正式肌力（踝穩定主）：\n• 單腳站 3×30s（每腳）\n• 提踵 3×20\n• 單腳平衡板 3×20s\n• 死蟲 3×10（核心）\n\n跑：5K Z2' },
+      { dow: '二', type: 'easy', title: '5K easy Z2', isRepeat: true, detail: '套模板：Z2 easy\nRPE 4-5，鼻呼吸，講完整句\n\n判準：走路 >2/10 → 跳跑改騎台/游泳；首 1K 有感、2K 後消 → 可跑縮 20%' },
+      { dow: '三', type: 'strength', title: '5K + 力量 20min', isNew: true, detail: '🆕 第一次正式肌力（踝穩定主）：\n• 單腳站 3×30s（每腳）\n• 提踵 3×20\n• 單腳平衡板 3×20s\n• 死蟲 3×10（核心）\n\n跑：5K Z2\n\n⚠️ 腳踝痛 >2 → 跳跑、只做肌力踝穩定段' },
       { dow: '四', type: 'strength', title: '力量 45min', isNew: true, detail: '🆕 肌力主課模板（Block A 全週沿用）：\n• 深蹲 3×12（穿負重背心）\n• 壺鈴硬舉 3×10（18kg）\n• 死蟲 3×10（每側）\n• 側棒 3×30s（每側）\n• 鳥狗 3×10' },
-      { dow: '五', type: 'quality', title: '4K + 6×30s strides', isNew: true, detail: '🆕 第一次 strides：\n4K easy 暖身\n接 6×30s strides：末段 200m 加速感，不衝刺\n組間 walk 回復' },
-      { dow: '六', type: 'long', title: '10K long Z2', isNew: true, detail: '🆕 長跑第一次破 10K：\n• RPE 5-6 Z2\n• 補水 500ml\n• 記錄：實際 RPE、腳踝、心率範圍' },
-      { dow: '日', type: 'easy', title: '2K shake / 游泳', isRepeat: true, detail: '超慢跑 2K 或 游泳 30min' },
+      { dow: '五', type: 'easy', title: '5K easy Z2（砍 strides）', isNew: true, detail: '⚠️ W1 腳踝調整：原 4K + 6×30s strides 砍掉\n改純 5K easy Z2，RPE 4-5\n\nstrides 從 W2 起再加（前提：腳踝 ≤1）' },
+      { dow: '六', type: 'long', title: '12K long Z2（縮版）', isNew: true, detail: '⚠️ W1 腳踝調整：原 10K → 12K Z2 純跑\n• RPE 5 不要 6\n• 配速 6:00/km 起，慢到懷疑人生\n• 補水 500ml + 末段觀察腳踝\n• 紀錄：實際 RPE、腳踝痛分、心率範圍\n\n判準：首 1K 有感 2K 後消 → 繼續；持續 >2/10 → 縮成 8K 走完' },
+      { dow: '日', type: 'rest', title: '休（腳踝恢復）', isNew: true, detail: '⚠️ W1 腳踝調整：原 2K shake 改完全休\n做 20min 動態伸展 + 踝穩定 3 組\n\n為 W2 重啟 strides 做準備' },
     ]
   },
   2: {
@@ -790,29 +779,29 @@ const WEEK_SUMMARIES = {
   9: { vol: 38, long: 17, note: 'Block B 開始，加入居家 HYROX 1x/週', highlights: ['🆕 HYROX 居家循環首次'] },
   10: { vol: 42, long: 20 },
   11: { vol: 45, long: 22 },
-  12: { vol: 35, long: 18, note: '⬇️ Deload + 🏋️ 本週末辦四季健身新店會員，W13 進場開練 HYROX 專項', highlights: ['🏋️ 7/6 W13 健身房進場日，本週要辦會員'] },
-  13: { vol: 44, long: 22, note: '🏋️ 健身房開始 - HYROX 改 2x/週（1x 居家 + 1x 健身房）', highlights: ['🆕 健身房進場、HYROX 升級 2x/週'] },
-  14: { vol: 47, long: 24 },
-  15: { vol: 48, long: 26, note: '⭐ Block B 峰值' },
-  16: { vol: 38, long: 19, note: '⬇️ Deload' },
-  17: { vol: 42, long: 20, note: 'HYROX 專項全面拉滿' },
-  18: { vol: 45, long: 22 },
-  19: { vol: 38, long: 18, note: '⬇️ Deload' },
+  12: { vol: 35, long: 18, note: '⬇️ Deload' },
+  13: { vol: 46, long: 22, note: '🆕 健身房 2x/週開始（提前 W17→W13）', highlights: ['🆕 健身房 HYROX 專項提前進場'] },
+  14: { vol: 48, long: 24, note: '🆕 首次 MP 短段 3K @ 4:37', highlights: ['🆕 MP 配速試水溫'] },
+  15: { vol: 50, long: 26, note: '⭐ Block B 峰值' },
+  16: { vol: 40, long: 20, note: '⬇️ Deload' },
+  17: { vol: 42, long: 22, note: '🏋️ 健身房 Simon 課（已是常態）' },
+  18: { vol: 45, long: 24 },
+  19: { vol: 36, long: 18, note: '⬇️ Deload' },
   20: { vol: 45, long: 24 },
-  21: { vol: 48, long: 24, note: 'HYROX 模擬週' },
-  22: { vol: 42, long: 21, note: '🎯 週末半馬測試，目標 1:32-1:33（含補給演練）', highlights: ['🎯 非正式半馬測試 - 確認 MP 4:37 能力'] },
-  23: { vol: 30, long: 15, note: '最後鋒利' },
-  24: { vol: 25, long: 10, note: '⬇️ Taper -50%' },
-  25: { vol: 20, long: 0, note: '🔴 HYROX race 10/15', highlights: ['🔴 HYROX 台灣站比賽週'] },
+  21: { vol: 48, long: 24, note: 'HYROX 模擬完賽 1:18-1:20' },
+  22: { vol: 40, long: 21, note: '🆕 非正式半馬測試 1:32-1:33', highlights: ['🆕 半馬測試確認 MP 能力'] },
+  23: { vol: 32, long: 15, note: '最後鋒利' },
+  24: { vol: 25, long: 10, note: '⬇️ Taper -40%' },
+  25: { vol: 18, long: 0, note: '🔴 HYROX race 10/15 · 目標 1:15', highlights: ['🔴 HYROX 台灣站 1:15'] },
   26: { vol: 15, long: 0, note: '完全恢復，無強度' },
-  27: { vol: 38, long: 20, note: '🏃 馬拉松 build 開始（升級版週量 60-65 峰值）', highlights: ['🆕 馬拉松專項期開始'] },
-  28: { vol: 48, long: 25 },
-  29: { vol: 55, long: 28, note: '🆕 首次 MP（4:37/km 嚴格）訓練', highlights: ['🆕 MP 配速訓練（4:37 嚴格）'] },
-  30: { vol: 60, long: 32, note: '⭐ 峰值長跑 1 - 32K Z2', highlights: ['⭐ 首次 32K 長跑'] },
+  27: { vol: 38, long: 22, note: '🏃 馬拉松 build 開始', highlights: ['🆕 馬拉松專項期開始'] },
+  28: { vol: 48, long: 26 },
+  29: { vol: 55, long: 28, note: '🆕 首次 MP intervals（4×2K @ 4:37）', highlights: ['🆕 MP intervals'] },
+  30: { vol: 62, long: 32, note: '⭐ 峰值長跑 1 - 32K Z2（破例 2.5hr+）', highlights: ['⭐ 首次 32K · 週末破例'] },
   31: { vol: 48, long: 22, note: '⬇️ Deload' },
-  32: { vol: 65, long: 32, note: '⭐ 峰值長跑 2 - 32K（含 12-15K MP）', highlights: ['⭐ 馬拉松最硬一週：32K 含 12-15K MP'] },
-  33: { vol: 48, long: 22, note: '⬇️ Taper 1 -25%' },
-  34: { vol: 25, long: 0, note: '🔴 Marathon race 12/20', highlights: ['🔴 台北馬拉松比賽週'] },
+  32: { vol: 65, long: 32, note: '⭐ 峰值長跑 2 - 32K 含 12-15K MP（最硬一週，破例 2.5hr+）', highlights: ['⭐ 32K + MP 12-15K · 週末破例'] },
+  33: { vol: 40, long: 18, note: '⬇️ Taper 1 -40%' },
+  34: { vol: 18, long: 0, note: '🔴 Marathon race 12/20 · 目標 sub-3:15', highlights: ['🔴 台北馬 sub-3:15'] },
 };
 
 // ============================================================
@@ -838,7 +827,7 @@ const TEMPLATES = {
   },
   'tempo': {
     title: '🔥 Tempo 執行',
-    content: `Tempo（乳酸閾值下）定義：\n• RPE 6（只能講短句）\n• 心率 ≈ Max HR × 80-87%\n• 對話會喘但能繼續\n\n執行：\n1. easy 3-5K 暖身\n2. tempo 段（2K → 3K → 5K 漸進）\n3. easy 3-5K 收操\n\n配速估算（3:15-3:20 馬拉松目標）：\n• MP（馬拉松配速）≈ 4:37-4:44/km\n• Tempo 比 MP 快 10-15s/km ≈ 4:22-4:29/km\n• 這只是起點，依實測調整\n\n週期：W6 首次 2K → W7 3K → Block B 5K → Block E 含 MP 訓練`
+    content: `Tempo（乳酸閾值下）定義：\n• RPE 6（只能講短句）\n• 心率 ≈ Max HR × 80-87%\n• 對話會喘但能繼續\n\n執行：\n1. easy 3-5K 暖身\n2. tempo 段（2K → 3K → 5K 漸進）\n3. easy 3-5K 收操\n\n配速估算（sub-3:15 嚴格）：\n• MP（馬拉松配速）= 4:37/km 嚴格\n• Tempo 比 MP 快 12-19s/km ≈ 4:18-4:25/km\n• 這只是起點，依實測調整\n\n週期：W6 首次 2K → W7 3K → Block B 5K → Block E 含 MP 訓練`
   },
   'long-run': {
     title: '🛤️ 長跑執行',
@@ -860,13 +849,13 @@ const TEMPLATES = {
     title: '🌀 暖身 5-10min（quality / long 前必做）',
     content: `5min 動態伸展：\n• 腿擺前後 × 10（每腿）\n• 開合跳 × 20\n• 高抬腿 30s\n• 深蹲 × 10\n• 弓步走 × 10\n• 踝關節繞環 × 10（每腳）\n\n5min 漸進慢跑：\n• 走路 → 超慢跑 → 本日目標配速 -30s/km\n\n適用：quality 跑、長跑、HYROX 前必做\nEasy 跑可跳過，直接慢起`
   },
-  'marathon-pace-goal': {
-    title: '🎯 馬拉松目標配速（sub-3:15）',
-    content: `目標時間：**sub-3:15**\n\n對應配速：\n• 3:15 = 4:37/km 嚴格\n• 中後段不能有任何單 K 慢於 4:42\n• 起跑前 5K 控制 4:42-4:45（避免太衝）\n\nBlock E 訓練強度對照：\n• Easy / Z2：5:15-5:45/km（MP +40-65s）\n• Long run Z2：5:15-5:45/km\n• MP intervals：4:37/km 嚴格\n• Tempo：4:18-4:25/km（MP -12 到 -19s）\n• 800m intervals：3:55-4:05/km\n\nW22-23 半馬測試目標：1:32-1:33\nW32 長跑：32K 含 12-15K MP（馬拉松最硬一週）\n\n這只是起點，W8 結束後依實測微調`
+  'hyrox-1-15-goal': {
+    title: '🎯 HYROX 1:15 配速解構',
+    content: `目標：1:15:00 完賽（前 10-15%）\n\n總時間切分：\n• 跑段（8×1K）：40 分鐘 → 平均 5:00/km\n• 站項（8 站）：16 分鐘以內\n   - 雪橇推/拉：4:00\n   - Row 1000m：3:30\n   - 其他 6 站合計：8:30（平均 1:25/站）\n• Transition + 站內微停：18-19 分鐘緩衝\n\n核心能力檢核：\n• 跑：5K 單獨 ≤ 21:30（W22 驗）\n• 雪橇後側鏈：硬舉 1RM ≥ 1.5×體重\n• Wall ball：18kg thruster × 50 不掉節奏\n• Burpee BJ：30 秒爆發 + 2 分鐘恢復重複能力\n\n弱站優先（Block C1）：\n1. 雪橇（後側鏈耐力）\n2. Wall ball（腿+肩耐力）\n3. Burpee BJ（爆發+恢復）\n\n關鍵能力：30 秒 → 2 分鐘爆發/恢復切換`
   },
-  'hyrox-pace-goal': {
-    title: '🎯 HYROX 目標配速（1:15）',
-    content: `目標時間：**1:15:00**（前 10-15%）\n\n配速拆解：\n• 8 段 1K 跑步：總 40 分鐘（5:00/km 均速）\n• 8 站專項：總 35 分鐘\n• 過站轉換：~1 分鐘 buffer\n\n關鍵跑步能力：\n• 5K 單跑能力須達 **21:30**（4:18/km）\n• 8 段 1K 累積疲勞下平均 5:00/km\n• HYROX 跑段配速 4:55-5:05/km\n\n站項時間目標（C1 期測試）：\n• Sled push 50m：3:30 內\n• Sled pull 50m：3:30 內\n• Burpee BJ 80m：5:30 內\n• Rowing 1000m：3:30 內\n• Farmer carry 200m：1:30 內\n• Sandbag lunges 100m：5:00 內\n• Wall balls 75：4:00 內\n• Ski erg 1000m：3:50 內\n\n弱站優先：雪橇（後側鏈）、wall ball（腿肩耐力）`
+  'marathon-pace-goal': {
+    title: '🎯 馬拉松目標配速（sub-3:15 嚴格）',
+    content: `目標時間：sub-3:15\n\nMP（馬拉松配速）：4:37/km 嚴格\n• 3:15:00 = 4:37.5/km × 42.195\n• 不再有「3:15-3:20」緩衝區\n\nBlock E 訓練強度對照：\n• Easy / Z2：5:30-6:00/km（MP +55s）\n• Long run Z2：5:15-5:45/km\n• MP intervals：4:37/km（嚴格，不是 4:44）\n• Half-marathon 測試：4:22-4:25/km（HM 1:32-1:33，W22）\n• Tempo：4:18-4:25/km（MP -12 到 -19s）\n• 800m intervals：3:55-4:05/km\n\n進度：\n• W14-15：MP 短段 3-5K 試水溫\n• W22：半馬測試 1:32-1:33 確認 MP 能力\n• W29 起：MP intervals 4×2K → 3×3K → 2×5K\n• W32：32K 含 12-15K MP（最硬）\n\n這只是起點，W8 結束後依實測微調`
   }
 };
 
@@ -890,8 +879,7 @@ function getTemplatesForDay(plan, weekNum) {
   if (plan.type === 'long') chips.push('long-run', 'z2-pace', 'warmup');
   if (plan.type === 'long' && weekNum >= 27) chips.push('marathon-pace-goal');
   if (plan.type === 'easy') chips.push('z2-pace');
-  if (plan.type === 'hyrox') chips.push('hyrox-home', 'hyrox-pace-goal');
-  if (plan.type === 'strength' && weekNum >= 13 && weekNum <= 25) chips.push('hyrox-pace-goal');
+  if (plan.type === 'hyrox') chips.push('hyrox-home');
   return chips;
 }
 
@@ -1247,8 +1235,8 @@ function getBriefing(plan, weekNum, dayIdx) {
   if (weekNum === 30 && plan.type === 'long') return '⭐ 馬拉松 peak long 1：32K 純 Z2。能輕鬆完成 = 沙發上的心安。';
   if (weekNum === 32 && plan.type === 'long') return '⭐ 最硬一週：32K 含 8K MP。這是全期訓練的測驗。配速 4:37-4:44/km。';
   if (weekNum >= 29 && plan.type === 'quality') return 'MP 訓練窗口。目標 4:37-4:44/km。準確 > 快。';
-  if (weekNum === 25) return '🏆 HYROX 比賽週。目標 1:15。跑段 5:00/km、站項總 16 分。前 4 站穩、5-7 站推、最後 1K 全給。';
-  if (weekNum === 34) return '🏆 馬拉松比賽週。目標 sub-3:15。MP 4:37 嚴格，前 5K 4:42-4:45 收住，10K 後切 MP，35K 後全力。';
+  if (weekNum === 25) return '🏆 HYROX 比賽週。相信訓練，分 8 站跑：穩、穩、穩、穩、穩、穩、穩、收。';
+  if (weekNum === 34) return '🏆 馬拉松比賽週。分 4 段：0-10 保守、10-25 節奏、25-35 專注、35-42 放空全給。';
   if (plan.type === 'easy') return '80/20 的 80 在這裡。跑太快 = 訓練最常見的錯誤。';
   if (plan.type === 'strength') return '肌力是跑步的保險。不做 = 傷病風險 +30%。';
   if (plan.type === 'quality') return 'Quality 課：暖身 5-10min 不能省。姿勢 > 速度。';
