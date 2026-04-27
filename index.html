@@ -288,7 +288,7 @@
   <div class="header-top">
     <div>
       <div class="title">🏃 Outrun Training 2026</div>
-      <div class="subtitle">HYROX 10/15 · 台北馬 12/20</div>
+      <div class="subtitle">HYROX 10/15 (1:15) · 台北馬 12/20 (sub-3:15)</div>
     </div>
     <button class="coach-btn" onclick="openCoach()">🎯 教練</button>
   </div>
@@ -621,10 +621,12 @@
 // DATA
 // ============================================================
 
-const PLAN_START = new Date('2026-04-24');  // W0 開跑準備從今天開始
-const W1_START = new Date('2026-04-27');
-const HYROX_DATE = new Date('2026-10-15');
-const MARATHON_DATE = new Date('2026-12-20');
+// 注意：new Date('YYYY-MM-DD') 會被當 UTC 解析（→ 台灣時間 +8h）。
+// 用 new Date(y, m-1, d) 才會建立「本地時區午夜」，跟 today.setHours(0,0,0,0) 對齊。
+const PLAN_START = new Date(2026, 3, 24);   // W0 開跑準備（4/24 五，本地 0:00）
+const W1_START = new Date(2026, 3, 27);     // W1 Mon 4/27
+const HYROX_DATE = new Date(2026, 9, 15);   // 10/15
+const MARATHON_DATE = new Date(2026, 11, 20); // 12/20
 
 const BLOCKS = [
   { id: 'W0', name: 'On-ramp 開跑準備', range: 'W0', dates: '4/24-4/26', weeks: [0], focus: '設備設定 + 基線測試 + on-ramp', color: 'accent' },
@@ -848,8 +850,12 @@ const TEMPLATES = {
     content: `5min 動態伸展：\n• 腿擺前後 × 10（每腿）\n• 開合跳 × 20\n• 高抬腿 30s\n• 深蹲 × 10\n• 弓步走 × 10\n• 踝關節繞環 × 10（每腳）\n\n5min 漸進慢跑：\n• 走路 → 超慢跑 → 本日目標配速 -30s/km\n\n適用：quality 跑、長跑、HYROX 前必做\nEasy 跑可跳過，直接慢起`
   },
   'marathon-pace-goal': {
-    title: '🎯 馬拉松目標配速（3:15-3:20）',
-    content: `目標時間：3:15-3:20\n\n對應配速：\n• 3:15 → 4:37/km（5:00/km if 起跑配速）\n• 3:20 → 4:44/km\n• 均值 MP ≈ 4:40/km\n\nBlock E 訓練強度對照：\n• Easy / Z2：5:30-6:00/km（MP +50s）\n• Long run Z2：5:15-5:45/km\n• MP intervals：4:37-4:44/km（準確 MP）\n• Tempo：4:22-4:30/km（MP -10 到 -18s）\n• 800m intervals：4:00-4:10/km\n\n這只是起點，W8 結束後依實測微調`
+    title: '🎯 馬拉松目標配速（sub-3:15）',
+    content: `目標時間：**sub-3:15**\n\n對應配速：\n• 3:15 = 4:37/km 嚴格\n• 中後段不能有任何單 K 慢於 4:42\n• 起跑前 5K 控制 4:42-4:45（避免太衝）\n\nBlock E 訓練強度對照：\n• Easy / Z2：5:15-5:45/km（MP +40-65s）\n• Long run Z2：5:15-5:45/km\n• MP intervals：4:37/km 嚴格\n• Tempo：4:18-4:25/km（MP -12 到 -19s）\n• 800m intervals：3:55-4:05/km\n\nW22-23 半馬測試目標：1:32-1:33\nW32 長跑：32K 含 12-15K MP（馬拉松最硬一週）\n\n這只是起點，W8 結束後依實測微調`
+  },
+  'hyrox-pace-goal': {
+    title: '🎯 HYROX 目標配速（1:15）',
+    content: `目標時間：**1:15:00**（前 10-15%）\n\n配速拆解：\n• 8 段 1K 跑步：總 40 分鐘（5:00/km 均速）\n• 8 站專項：總 35 分鐘\n• 過站轉換：~1 分鐘 buffer\n\n關鍵跑步能力：\n• 5K 單跑能力須達 **21:30**（4:18/km）\n• 8 段 1K 累積疲勞下平均 5:00/km\n• HYROX 跑段配速 4:55-5:05/km\n\n站項時間目標（C1 期測試）：\n• Sled push 50m：3:30 內\n• Sled pull 50m：3:30 內\n• Burpee BJ 80m：5:30 內\n• Rowing 1000m：3:30 內\n• Farmer carry 200m：1:30 內\n• Sandbag lunges 100m：5:00 內\n• Wall balls 75：4:00 內\n• Ski erg 1000m：3:50 內\n\n弱站優先：雪橇（後側鏈）、wall ball（腿肩耐力）`
   }
 };
 
@@ -873,7 +879,8 @@ function getTemplatesForDay(plan, weekNum) {
   if (plan.type === 'long') chips.push('long-run', 'z2-pace', 'warmup');
   if (plan.type === 'long' && weekNum >= 27) chips.push('marathon-pace-goal');
   if (plan.type === 'easy') chips.push('z2-pace');
-  if (plan.type === 'hyrox') chips.push('hyrox-home');
+  if (plan.type === 'hyrox') chips.push('hyrox-home', 'hyrox-pace-goal');
+  if (plan.type === 'strength' && weekNum >= 13 && weekNum <= 25) chips.push('hyrox-pace-goal');
   return chips;
 }
 
@@ -1052,7 +1059,16 @@ function mergeCloudData(cloud) {
 
   (cloud.daily || []).forEach(row => {
     if (!row.date) return;
-    const date = String(row.date).slice(0, 10);
+    // 防呆：Apps Script 已 normalize 成 yyyy-mm-dd，但若 row.date 不小心是 Date object（例如未來改用其他來源），
+    // 用 parseLocalDate + dateStr 走時區安全路徑，避免 String(Date).slice(0,10) 取到 'Sat Apr 2'
+    let date;
+    if (typeof row.date === 'string' && /^\d{4}-\d{2}-\d{2}/.test(row.date)) {
+      date = row.date.slice(0, 10);
+    } else {
+      const d = row.date instanceof Date ? row.date : parseLocalDate(String(row.date));
+      date = d ? dateStr(d) : null;
+    }
+    if (!date) return;
     const existing = s.logs[date] || {};
     s.logs[date] = { ...existing };
     ['rpe', 'km', 'ankle', 'hrv', 'rhr', 'sleep_hr', 'deep_sleep_hr',
@@ -1106,13 +1122,13 @@ function setDone(dateStr, v) {
   const s = getState(); s.done = s.done || {};
   if (v) s.done[dateStr] = new Date().toISOString(); else delete s.done[dateStr];
   saveState(s);
-  const d = new Date(dateStr); const w = weekNumForDate(d);
+  const d = parseLocalDate(dateStr); const w = weekNumForDate(d);
   CLOUD.setDone(dateStr, v, w).then(cloudToast).catch(e => cloudToast({ok:false,error:e.message}));
 }
 function getLog(dateStr) { return (getState().logs || {})[dateStr] || {}; }
 function setLog(dateStr, log) {
   const s = getState(); s.logs = s.logs || {}; s.logs[dateStr] = log; saveState(s);
-  const d = new Date(dateStr); const w = weekNumForDate(d);
+  const d = parseLocalDate(dateStr); const w = weekNumForDate(d);
   CLOUD.saveLog(dateStr, { ...log, weekNum: w }).then(cloudToast).catch(e => cloudToast({ok:false,error:e.message}));
 }
 function getReview(weekNum) { return (getState().reviews || {})[weekNum] || {}; }
@@ -1159,7 +1175,7 @@ function checkMilestones(silent = false) {
       unlocked = Object.values(logs).some(l => parseFloat(l?.km || 0) >= m.min);
     } else if (m.type === 'day-kind') {
       for (const ds of Object.keys(done)) {
-        const date = new Date(ds);
+        const date = parseLocalDate(ds);
         const w = weekNumForDate(date);
         if (w < 0) continue;
         const di = dayIdxInWeek(date, w);
@@ -1220,8 +1236,8 @@ function getBriefing(plan, weekNum, dayIdx) {
   if (weekNum === 30 && plan.type === 'long') return '⭐ 馬拉松 peak long 1：32K 純 Z2。能輕鬆完成 = 沙發上的心安。';
   if (weekNum === 32 && plan.type === 'long') return '⭐ 最硬一週：32K 含 8K MP。這是全期訓練的測驗。配速 4:37-4:44/km。';
   if (weekNum >= 29 && plan.type === 'quality') return 'MP 訓練窗口。目標 4:37-4:44/km。準確 > 快。';
-  if (weekNum === 25) return '🏆 HYROX 比賽週。相信訓練，分 8 站跑：穩、穩、穩、穩、穩、穩、穩、收。';
-  if (weekNum === 34) return '🏆 馬拉松比賽週。分 4 段：0-10 保守、10-25 節奏、25-35 專注、35-42 放空全給。';
+  if (weekNum === 25) return '🏆 HYROX 比賽週。目標 1:15。跑段 5:00/km、站項總 16 分。前 4 站穩、5-7 站推、最後 1K 全給。';
+  if (weekNum === 34) return '🏆 馬拉松比賽週。目標 sub-3:15。MP 4:37 嚴格，前 5K 4:42-4:45 收住，10K 後切 MP，35K 後全力。';
   if (plan.type === 'easy') return '80/20 的 80 在這裡。跑太快 = 訓練最常見的錯誤。';
   if (plan.type === 'strength') return '肌力是跑步的保險。不做 = 傷病風險 +30%。';
   if (plan.type === 'quality') return 'Quality 課：暖身 5-10min 不能省。姿勢 > 速度。';
@@ -1527,9 +1543,26 @@ function getRawDayPlan(weekNum, dayIdx) {
 // HELPERS
 // ============================================================
 
-function dateStr(d) { return d.toISOString().slice(0, 10); }
+// 用本地年月日輸出 yyyy-mm-dd（toISOString() 會把台灣 00:00 轉成 UTC 前一天 16:00）
+function dateStr(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+// 解析 'YYYY-MM-DD' 為「本地時區午夜」（避免 new Date('2026-04-27') 被當 UTC）
+function parseLocalDate(s) {
+  if (!s) return null;
+  const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return new Date(s); // fallback（含時區資訊的 ISO timestamp）
+  return new Date(parseInt(m[1]), parseInt(m[2]) - 1, parseInt(m[3]));
+}
 function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
-function daysBetween(a, b) { return Math.round((b - a) / 86400000); }
+function daysBetween(a, b) {
+  const aLocal = new Date(a.getFullYear(), a.getMonth(), a.getDate());
+  const bLocal = new Date(b.getFullYear(), b.getMonth(), b.getDate());
+  return Math.round((bLocal - aLocal) / 86400000);
+}
 
 function weekNumForDate(d) {
   const diff = daysBetween(W1_START, d);
@@ -1849,7 +1882,7 @@ function renderTrends() {
   const sortedDates = Object.keys(logs).sort();
   sortedDates.slice(-28).forEach(ds => {
     const l = logs[ds];
-    const d = new Date(ds);
+    const d = parseLocalDate(ds);
     const label = `${d.getMonth()+1}/${d.getDate()}`;
     if (l?.hrv) hrvData.push({ label, value: parseFloat(l.hrv) });
     if (l?.sleep_hr) sleepData.push({ label, value: parseFloat(l.sleep_hr) });
@@ -2132,6 +2165,7 @@ renderAll();
 window.addEventListener('resize', () => { renderTrends(); drawPlanChart(); });
 // 若已設定雲端 → 啟動時拉一次
 if (getState().cloudConfig?.url) {
+  console.info('[outrun-training] cloud sync: last-write-wins (single-device or pull-before-edit)');
   setTimeout(() => cloudPull().catch(()=>{}), 500);
 }
 </script>
