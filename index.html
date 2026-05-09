@@ -404,7 +404,7 @@
       <div class="strava-status" id="cloud-status"></div>
       <div class="tool-row">
         <button class="btn secondary" onclick="cloudConfigure()">🔧 設定 URL</button>
-        <button class="btn secondary" onclick="cloudPull()">⬇️ 從雲端拉</button>
+        <button class="btn secondary" onclick="cloudPull({verbose:true})">⬇️ 從雲端拉</button>
         <button class="btn secondary" onclick="cloudBulkPush()">⬆️ 全部推上去</button>
         <button class="btn secondary" onclick="cloudDisconnect()">斷開</button>
       </div>
@@ -956,9 +956,15 @@ function formatSleepHours(hours) {
 // Cloud Sync (Google Apps Script Web App)
 // ============================================================
 
+// 預設雲端設定 — 即使 localStorage cloudConfig 沒設也能自動拉資料
+// 使用者可透過 cloudConfigure() 覆寫成自己的 endpoint
+const CLOUD_DEFAULT = {
+  url: 'https://script.google.com/macros/s/AKfycbz4o-SlkdULwzvapPKfxo3_ef_dN4bNJzalqaDEPjinbzH6sYNpfZmMmtgYGZ8OVPBw/exec',
+  token: '052954d9ba86fe802661',
+};
 const CLOUD = {
-  url() { return getState().cloudConfig?.url || ''; },
-  token() { return getState().cloudConfig?.token || ''; },
+  url() { return getState().cloudConfig?.url || CLOUD_DEFAULT.url || ''; },
+  token() { return getState().cloudConfig?.token || CLOUD_DEFAULT.token || ''; },
 
   async _post(body) {
     const url = this.url();
@@ -1066,18 +1072,22 @@ async function cloudBulkPush() {
   }
 }
 
-async function cloudPull() {
-  if (!CLOUD.url()) return;
+async function cloudPull(opts) {
+  const verbose = opts?.verbose;
+  if (!CLOUD.url()) { if (verbose) showToast('未設定雲端 URL'); return; }
   const r = await CLOUD.pull();
   if (!r.ok) {
-    console.warn('[cloud] pull failed:', r.error);
+    console.warn('[cloud] pull failed:', r.error || r);
+    showToast('⚠️ 雲端拉取失敗：' + (r.error || '無回應'));
     return;
   }
+  const dailyCount = (r.data?.daily || []).length;
   mergeCloudData(r.data || {});
   const s = getState();
   s.lastCloudSync = new Date().toISOString();
   saveState(s);
   renderAll();
+  if (verbose) showToast(`✓ 已從雲端拉取 ${dailyCount} 筆 daily log`);
 }
 
 function mergeCloudData(cloud) {
@@ -2293,11 +2303,9 @@ function renderAll() {
 currentWeek = Math.max(0, Math.min(34, weekNumForDate(new Date())));
 renderAll();
 window.addEventListener('resize', () => { renderTrends(); drawPlanChart(); });
-// 若已設定雲端 → 啟動時拉一次
-if (getState().cloudConfig?.url) {
-  console.info('[outrun-training] cloud sync: last-write-wins (single-device or pull-before-edit)');
-  setTimeout(() => cloudPull().catch(()=>{}), 500);
-}
+// 啟動時自動拉雲端（即使 localStorage 沒設 cloudConfig，會走 CLOUD_DEFAULT）
+console.info('[outrun-training] cloud sync: last-write-wins (single-device or pull-before-edit)');
+setTimeout(() => cloudPull().catch(e => console.warn('[cloud] boot pull error:', e)), 500);
 </script>
 </body>
 </html>
