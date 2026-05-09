@@ -416,6 +416,37 @@
   </div>
 
   <div class="card">
+    <div class="card-title">📥 批次匯入訓練紀錄</div>
+    <div class="card-sub">給 AI / 自己之後一次貼多天資料用。每行一天，TSV（Tab 分隔）或 JSON Lines。</div>
+    <div class="strava-box">
+      <div style="margin-bottom:0.5rem">
+        <strong>格式 A — TSV（建議）</strong>
+        <div class="card-sub" style="margin:0.25rem 0">
+          欄位順序：<code>date	rpe	km	pace	duration_min	ankle	hrv	rhr	sleep_hr	notes</code><br>
+          欄位空著用空字串、或留 Tab 隔。第一行可選擇是否加 header（會自動偵測）。
+        </div>
+        <div class="card-sub" style="margin:0.25rem 0">
+          範例：<code style="background:var(--bg);padding:0.1rem 0.3rem;border-radius:3px;display:block;margin-top:0.25rem;white-space:pre">2026-05-06	4	5.02	5:55		2					easy run / HR 125
+2026-05-07	5	0		33.56	2					力量 7 組 / HR 87</code>
+        </div>
+      </div>
+      <div style="margin-bottom:0.5rem">
+        <strong>格式 B — JSON Lines</strong>
+        <div class="card-sub" style="margin:0.25rem 0">
+          每行一個 <code>{"date":"2026-05-06","rpe":4,"km":5.02,...}</code>
+        </div>
+      </div>
+      <textarea id="batch-import-text" rows="8" style="width:100%;font-family:monospace;font-size:0.85rem;padding:0.5rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text)" placeholder="把資料貼這裡（一行一天）"></textarea>
+      <div class="tool-row" style="margin-top:0.5rem">
+        <button class="btn secondary" onclick="batchImportPreview()">👁 預覽（不寫入）</button>
+        <button class="btn primary" onclick="batchImportRun()">📤 寫入雲端</button>
+        <button class="btn secondary" onclick="document.getElementById('batch-import-text').value=''">清空</button>
+      </div>
+      <div id="batch-import-output" class="card-sub" style="margin-top:0.5rem;font-family:monospace;font-size:0.8rem;white-space:pre-wrap"></div>
+    </div>
+  </div>
+
+  <div class="card">
     <div class="card-title">🏅 成就徽章</div>
     <div class="card-sub">達成訓練 milestone 會自動解鎖</div>
     <div class="badge-grid" id="badge-grid"></div>
@@ -1114,6 +1145,106 @@ function cloudToast(r) {
   saveState(s);
   showToast('⚠️ 雲端未同步（' + (r.error || '未知') + '）');
   renderCloudStatus();
+}
+
+// ============================================================
+// 批次匯入（Plan B — 給 AI/Buzz 之後一次貼 N 天資料用）
+// ============================================================
+const BATCH_TSV_FIELDS = ['date','rpe','km','pace','duration_min','ankle','hrv','rhr','sleep_hr','notes'];
+
+function _batchParse(raw) {
+  const out = []; const errs = [];
+  const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+  if (lines.length === 0) return { rows: [], errors: ['空白輸入'] };
+
+  // detect mode: JSONL if first non-empty line starts with '{'
+  const isJsonl = lines[0].startsWith('{');
+  if (isJsonl) {
+    lines.forEach((line, i) => {
+      try {
+        const obj = JSON.parse(line);
+        if (!obj.date) { errs.push(`L${i+1}: 缺 date`); return; }
+        out.push(obj);
+      } catch (e) { errs.push(`L${i+1}: JSON parse error - ${e.message}`); }
+    });
+    return { rows: out, errors: errs };
+  }
+
+  // TSV mode — skip header line if first cell isn't a date
+  let dataLines = lines;
+  const firstCell = lines[0].split('\t')[0].trim();
+  if (!/^\d{4}-\d{2}-\d{2}/.test(firstCell)) {
+    dataLines = lines.slice(1);
+  }
+  dataLines.forEach((line, i) => {
+    const cells = line.split('\t');
+    if (cells.length < 1 || !cells[0].trim()) return;
+    const obj = {};
+    BATCH_TSV_FIELDS.forEach((f, idx) => {
+      const v = (cells[idx] || '').trim();
+      if (v === '') return;
+      // numeric fields
+      if (['rpe','km','duration_min','ankle','hrv','rhr','sleep_hr'].includes(f)) {
+        const n = parseFloat(v);
+        if (!isNaN(n)) obj[f] = n;
+      } else {
+        obj[f] = v;
+      }
+    });
+    if (!obj.date || !/^\d{4}-\d{2}-\d{2}$/.test(obj.date)) {
+      errs.push(`L${i+1}: date 格式錯誤（要 YYYY-MM-DD），原始：${line.slice(0,40)}`);
+      return;
+    }
+    out.push(obj);
+  });
+  return { rows: out, errors: errs };
+}
+
+function batchImportPreview() {
+  const raw = document.getElementById('batch-import-text').value;
+  const { rows, errors } = _batchParse(raw);
+  const out = document.getElementById('batch-import-output');
+  let txt = '';
+  if (errors.length) txt += '⚠️ 錯誤:\n' + errors.join('\n') + '\n\n';
+  txt += `✅ 解析出 ${rows.length} 筆：\n`;
+  rows.forEach(r => {
+    const { date, ...rest } = r;
+    txt += `${date} → ${JSON.stringify(rest)}\n`;
+  });
+  out.textContent = txt;
+}
+
+async function batchImportRun() {
+  const raw = document.getElementById('batch-import-text').value;
+  const { rows, errors } = _batchParse(raw);
+  const out = document.getElementById('batch-import-output');
+  if (errors.length) {
+    out.textContent = '⚠️ 先修錯誤再執行:\n' + errors.join('\n');
+    return;
+  }
+  if (rows.length === 0) { out.textContent = '沒資料可寫入'; return; }
+  if (!CLOUD.url()) { out.textContent = '⚠️ 雲端未設定，先到上面設 URL'; return; }
+  if (!window.confirm(`要把 ${rows.length} 筆資料寫進雲端嗎？（已存在的日期會 merge，不覆蓋既有非空欄位）`)) return;
+
+  out.textContent = `寫入中… 0 / ${rows.length}`;
+  let ok = 0, fail = 0; const failLog = [];
+  for (let i = 0; i < rows.length; i++) {
+    const { date, ...data } = rows[i];
+    try {
+      const r = await CLOUD.saveLog(date, data);
+      if (r && r.ok !== false && !r.error) ok++;
+      else { fail++; failLog.push(`${date}: ${r?.error || 'unknown'}`); }
+    } catch (e) { fail++; failLog.push(`${date}: ${e.message}`); }
+    out.textContent = `寫入中… ${i+1} / ${rows.length} （ok=${ok} fail=${fail}）`;
+  }
+  let final = `✅ 完成：ok=${ok} fail=${fail}\n`;
+  if (failLog.length) final += '\n失敗清單:\n' + failLog.join('\n');
+  out.textContent = final;
+  showToast(`批次匯入：ok ${ok} / fail ${fail}`);
+  // 重新拉雲端確認資料一致
+  if (ok > 0) {
+    setTimeout(() => { if (typeof cloudPull === 'function') cloudPull(); }, 500);
+  }
 }
 
 function isDone(dateStr) { return !!(getState().done || {})[dateStr]; }
